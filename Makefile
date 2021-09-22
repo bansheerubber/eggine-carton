@@ -1,8 +1,8 @@
 target = carton
-cclibs =
-ccinclude =
+cclibs = -lz
+ccinclude = -Iinclude/robin-map/include -Iinclude
 CC = g++
-CPPFLAGS = -O2 -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
+CPPFLAGS = -g -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
 soflags =
 ldflags =
 
