@@ -14,6 +14,7 @@ namespace carton {
 		friend class File;
 		friend class Metadata;
 		friend StringTable;
+		friend size_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level);
 		
 		public:
 			Carton();
@@ -47,6 +48,9 @@ namespace carton {
 				this->file.write(data, size);
 				return sizeof(T) + size;
 			}
+
+			size_t writeDeflated(istream &stream, EggCompressionTypes level);
+			size_t writeDeflated(char* buffer, size_t size, EggCompressionTypes level);
 
 			// read methods
 			Egg readEgg();

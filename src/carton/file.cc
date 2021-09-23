@@ -35,68 +35,20 @@ void carton::File::write() {
 	this->metadata->write();
 
 	if(this->compress) {
+		EggCompressionTypes level = ZLIB_LEVEL_0;
+		
 		streampos eggPosition = this->carton->writeEgg(Egg {
 			type: FILE,
 			blockSize: 0,
 			continuedBlock: 0,
-			compressionType: ZLIB_BEST,
+			compressionType: level,
 		});
 
-		const size_t outBufferSize = 1 << 20; // write a megabyte at a time
-		unsigned char outBuffer[outBufferSize];
-
-		const size_t inBufferSize = 1 << 20; // read a megabyte at a time
-		char inBuffer[inBufferSize];
-
-		z_stream stream {
-			next_in: (unsigned char*)inBuffer,
-			avail_in: inBufferSize,
-			next_out: outBuffer,
-			avail_out: outBufferSize,
-			zalloc: 0,
-			zfree: 0,
-		};
-
-		streampos start = this->carton->file.tellp();
 		ifstream file(this->fileName);
-		deflateInit(&stream, Z_BEST_COMPRESSION);
-
-		while(true) {
-			file.read(inBuffer, inBufferSize);
-			streamsize readCount = file.gcount();
-			
-			stream.next_in = (unsigned char*)inBuffer;
-			stream.avail_in = readCount;
-
-			if(readCount == 0) {
-				break;
-			}
-
-			// write the result to the file
-			do {
-				deflate(&stream, 0);
-				this->carton->file.write((char*)outBuffer, outBufferSize - stream.avail_out);
-
-				stream.next_out = outBuffer;
-				stream.avail_out = outBufferSize;
-			}
-			while(stream.avail_in > 0);
-		}
-
-		int result;
-		do {
-			result = deflate(&stream, Z_FINISH);
-			this->carton->file.write((char*)outBuffer, outBufferSize - stream.avail_out);
-
-			stream.next_out = outBuffer;
-			stream.avail_out = outBufferSize;
-		}
-		while(result == Z_OK);
-		
-		deflateEnd(&stream);
+		size_t deflatedSize = this->carton->writeDeflated(file, level);
 		file.close();
 
-		this->carton->writeEggSize(this->carton->file.tellp() - start, eggPosition);
+		this->carton->writeEggSize(deflatedSize, eggPosition);
 	}
 	else {
 		streampos eggPosition = this->carton->writeEgg(Egg {
@@ -137,7 +89,7 @@ void carton::File::read(Egg &header) {
 			break;
 		}
 
-		case ZLIB_BEST: {
+		case ZLIB_LEVEL_9: {
 			const size_t outBufferSize = 1 << 20; // write a megabyte at a time
 			unsigned char outBuffer[outBufferSize];
 

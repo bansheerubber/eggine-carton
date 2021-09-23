@@ -10,7 +10,16 @@ namespace carton {
 
 	enum EggCompressionTypes {
 		NO_COMPRESSION,
-		ZLIB_BEST,
+		ZLIB_LEVEL_0,
+		ZLIB_LEVEL_1,
+		ZLIB_LEVEL_2,
+		ZLIB_LEVEL_3,
+		ZLIB_LEVEL_4,
+		ZLIB_LEVEL_5,
+		ZLIB_LEVEL_6,
+		ZLIB_LEVEL_7,
+		ZLIB_LEVEL_8,
+		ZLIB_LEVEL_9,
 	};
 	
 	struct Egg { // an egg is a block of data
