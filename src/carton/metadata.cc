@@ -28,9 +28,9 @@ void carton::Metadata::write() {
 	this->carton->writeEggSize(totalSize, eggPosition);
 }
 
-void carton::Metadata::read(Egg &header) {
+void carton::Metadata::read(Egg &header, unsigned int size) {
 	streampos start = this->carton->file.tellg();
-	while(this->carton->file.tellg() < start + header.blockSize) {
+	while(this->carton->canRead(start, size)) {
 		string_table_index index = this->carton->readNumber<string_table_index>();
 		this->addMetadata(this->carton->stringTable.lookup(index), this->carton->readString<metadata_value_length>());
 	}

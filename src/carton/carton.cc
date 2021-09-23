@@ -1,5 +1,6 @@
 #include "carton.h"
 
+#include <cstring>
 #include <fstream>
 #include <zlib.h>
 
@@ -41,26 +42,32 @@ void carton::Carton::read(string fileName) {
 		exit(1);
 	}
 
-	Egg stringTableEgg = this->readEgg();
-	if(stringTableEgg.type != STRING_TABLE) {
-		printf("expected first egg to be string table for '%s'\n", fileName.c_str());
-		exit(1);
-	}
-
-	this->stringTable.read(stringTableEgg); // first block must always be the string table
-
 	Metadata* lastMetadata = nullptr;
 	while(this->file.tellg() < totalSize) {
 		Egg egg = this->readEgg();
+
+		unsigned int size = egg.blockSize;
+		if(egg.compressionType != NO_COMPRESSION) {
+			this->readDeflatedIntoFileBuffer((EggCompressionTypes)egg.compressionType, egg.blockSize);
+			this->fileBufferSize = this->fileBufferPointer;
+			this->fileBufferPointer = 0;
+			size = this->fileBufferSize;
+		}
+
 		switch(egg.type) {
+			case STRING_TABLE: {
+				this->stringTable.read(egg, size);
+				break;
+			}
+			
 			case METADATA: {
 				lastMetadata = new Metadata(this);
-				lastMetadata->read(egg);
+				lastMetadata->read(egg, size);
 				break;
 			}
 			
 			case FILE: {
-				(new File(this, lastMetadata))->read(egg);
+				(new File(this, lastMetadata))->read(egg, size);
 				break;
 			}
 
@@ -68,6 +75,10 @@ void carton::Carton::read(string fileName) {
 				printf("unexpected egg type '%d'\n", egg.type);
 				exit(1);
 			}
+		}
+
+		if(egg.compressionType != NO_COMPRESSION) {
+			this->deleteFileBuffer(); // clean up the mess
 		}
 	}
 
@@ -201,7 +212,7 @@ void carton::Carton::initFileBuffer() {
 
 void carton::Carton::deleteFileBuffer() {
 	if(this->fileBuffer != nullptr) {
-		delete this->fileBuffer;
+		free(this->fileBuffer);
 	}
 
 	this->fileBuffer = nullptr;
@@ -214,9 +225,10 @@ void carton::Carton::commitFileBuffer() {
 	this->deleteFileBuffer();
 }
 
-void carton::Carton::commitDeflatedFileBuffer(EggCompressionTypes compression) {
-	this->writeDeflated(this->fileBuffer, this->fileBufferPointer, compression);
+size_t carton::Carton::commitDeflatedFileBuffer(EggCompressionTypes compression) {
+	size_t size = this->writeDeflated(this->fileBuffer, this->fileBufferPointer, compression);
 	this->deleteFileBuffer();
+	return size;
 }
 
 void carton::Carton::writeToFileBuffer(char byte) {
@@ -224,12 +236,90 @@ void carton::Carton::writeToFileBuffer(char byte) {
 	this->fileBufferPointer++;
 	
 	if(this->fileBufferPointer == this->fileBufferSize) { // resize buffer
-		this->fileBuffer = (char*)realloc(this->fileBuffer, sizeof(char) * this->fileBufferSize * 2);
+		this->fileBufferSize = this->fileBufferSize * 2; // new size
+		this->fileBuffer = (char*)realloc(this->fileBuffer, sizeof(char) * this->fileBufferSize);
 	}
+}
+
+void carton::Carton::writeBytesToFileBuffer(char* bytes, size_t size) {
+	size_t newSize = this->fileBufferPointer + size;
+	while(this->fileBufferSize < newSize) {
+		this->fileBufferSize = this->fileBufferSize * 2; // new size
+		this->fileBuffer = (char*)realloc(this->fileBuffer, sizeof(char) * this->fileBufferSize);
+	}
+
+	memcpy(&this->fileBuffer[this->fileBufferPointer], bytes, sizeof(char) * size);
+	this->fileBufferPointer += size;
 }
 
 void carton::Carton::readFromFileBuffer(char* output, size_t amount) {
 	for(size_t i = 0; i < amount; i++) {
 		output[i] = this->fileBuffer[this->fileBufferPointer++];
 	}
+}
+
+bool carton::Carton::canRead(streampos start, unsigned int size) {
+	if(this->fileBufferSize != 0) {
+		return this->fileBufferPointer < size;
+	}
+	else {
+		return this->file.tellg() < start + size;
+	}
+}
+
+void carton::Carton::readDeflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize) {
+	this->initFileBuffer();
+	
+	const size_t outBufferSize = 1 << 20; // write a megabyte at a time
+	unsigned char outBuffer[outBufferSize];
+
+	const size_t inBufferSize = 1 << 20; // read a megabyte at a time
+	char inBuffer[inBufferSize];
+	
+	z_stream stream {
+		next_in: (unsigned char*)inBuffer,
+		avail_in: inBufferSize,
+		next_out: outBuffer,
+		avail_out: outBufferSize,
+		zalloc: 0,
+		zfree: 0,
+	};
+
+	inflateInit(&stream);
+	streampos start = this->file.tellg();
+	size_t readBytes = 0;
+	while(readBytes != blockSize) {
+		this->file.read(inBuffer, min(blockSize - readBytes, inBufferSize));
+		size_t read = this->file.gcount();
+		readBytes += read;
+
+		stream.next_in = (unsigned char*)inBuffer;
+		stream.avail_in = read;
+
+		if(read == 0) {
+			break;
+		}
+
+		// write the result to the file
+		do {
+			int result = inflate(&stream, 0);
+			this->writeBytesToFileBuffer((char*)outBuffer, outBufferSize - stream.avail_out);
+
+			stream.next_out = outBuffer;
+			stream.avail_out = outBufferSize;
+		}
+		while(stream.avail_in > 0);
+	}
+
+	int result;
+	do {
+		result = inflate(&stream, Z_FINISH);
+		this->writeBytesToFileBuffer((char*)outBuffer, outBufferSize - stream.avail_out);
+
+		stream.next_out = outBuffer;
+		stream.avail_out = outBufferSize;
+	}
+	while(result == Z_OK);
+	
+	inflateEnd(&stream);
 }

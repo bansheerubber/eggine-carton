@@ -30,6 +30,6 @@ namespace carton {
 
 			string_table_index addString(string value, string_table_index index);
 			void write();
-			void read(Egg &header);
+			void read(Egg &header, unsigned int size);
 	};
 };

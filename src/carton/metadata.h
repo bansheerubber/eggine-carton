@@ -24,6 +24,6 @@ namespace carton {
 			tsl::robin_map<string, string> metadata;
 
 			void write();
-			void read(Egg &header);
+			void read(Egg &header, unsigned int size);
 	};
 };

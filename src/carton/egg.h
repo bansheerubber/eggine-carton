@@ -48,6 +48,6 @@ namespace carton {
 			class Carton* carton = nullptr;
 			
 			virtual void write() = 0;
-			virtual void read(Egg &header) = 0;
+			virtual void read(Egg &header, unsigned int size) = 0;
 	};
 };

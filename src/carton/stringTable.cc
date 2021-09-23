@@ -44,14 +44,14 @@ void carton::StringTable::write() {
 		totalSize += this->carton->writeString(key.c_str(), size); // write string
 	}
 
-	this->carton->commitDeflatedFileBuffer(ZLIB_LEVEL_9);
+	unsigned int compressedSize = (unsigned int)this->carton->commitDeflatedFileBuffer(ZLIB_LEVEL_9);
 
-	this->carton->writeEggSize(totalSize, eggPosition);
+	this->carton->writeEggSize(compressedSize, eggPosition);
 }
 
-void carton::StringTable::read(Egg &header) {
+void carton::StringTable::read(Egg &header, unsigned int size) {
 	streampos start = this->carton->file.tellg();
-	while(this->carton->file.tellg() < start + header.blockSize) {
+	while(this->carton->canRead(start, size)) {
 		string_table_index index = this->carton->readNumber<string_table_index>();
 		this->addString(this->carton->readString<unsigned char>(), index);
 	}

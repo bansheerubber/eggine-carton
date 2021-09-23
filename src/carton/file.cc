@@ -1,7 +1,6 @@
 #include "file.h"
 
 #include <fstream>
-#include <zlib.h>
 
 #include "carton.h"
 #include "metadata.h"
@@ -35,7 +34,7 @@ void carton::File::write() {
 	this->metadata->write();
 
 	if(this->compress) {
-		EggCompressionTypes level = ZLIB_LEVEL_0;
+		EggCompressionTypes level = ZLIB_LEVEL_6;
 		
 		streampos eggPosition = this->carton->writeEgg(Egg {
 			type: FILE,
@@ -66,87 +65,29 @@ void carton::File::write() {
 	}
 }
 
-void carton::File::read(Egg &header) {
+void carton::File::read(Egg &header, unsigned int size) {
 	this->setFileName(this->metadata->getMetadata("fileName"));
 	
-	switch(header.compressionType) {
-		case NO_COMPRESSION: {
-			const size_t inBufferSize = 1 << 20; // read a megabyte at a time
-			char inBuffer[inBufferSize];
+	if(header.compressionType == NO_COMPRESSION) { // if we have no compression, read from the file pointer
+		const size_t inBufferSize = 1 << 20; // read a megabyte at a time
+		char inBuffer[inBufferSize];
 
-			ofstream file("output/" + this->getFileName());
-			streampos start = this->carton->file.tellg();
-			size_t readBytes = 0;
-			while(readBytes != header.blockSize) {
-				this->carton->file.read(inBuffer, min(header.blockSize - readBytes, inBufferSize));
-				size_t read = this->carton->file.gcount();
-				readBytes += read;
+		ofstream file("output/" + this->getFileName());
+		streampos start = this->carton->file.tellg();
+		size_t readBytes = 0;
+		while(readBytes != header.blockSize) {
+			this->carton->file.read(inBuffer, min(header.blockSize - readBytes, inBufferSize));
+			size_t read = this->carton->file.gcount();
+			readBytes += read;
 
-				file.write(inBuffer, read);
-			}
-
-			file.close();
-			break;
+			file.write(inBuffer, read);
 		}
 
-		case ZLIB_LEVEL_9: {
-			const size_t outBufferSize = 1 << 20; // write a megabyte at a time
-			unsigned char outBuffer[outBufferSize];
-
-			const size_t inBufferSize = 1 << 20; // read a megabyte at a time
-			char inBuffer[inBufferSize];
-			
-			z_stream stream {
-				next_in: (unsigned char*)inBuffer,
-				avail_in: inBufferSize,
-				next_out: outBuffer,
-				avail_out: outBufferSize,
-				zalloc: 0,
-				zfree: 0,
-			};
-
-			inflateInit(&stream);
-			ofstream file("output/" + this->getFileName());
-			streampos start = this->carton->file.tellg();
-			size_t readBytes = 0;
-			while(readBytes != header.blockSize) {
-				this->carton->file.read(inBuffer, min(header.blockSize - readBytes, inBufferSize));
-				size_t read = this->carton->file.gcount();
-				readBytes += read;
-
-				stream.next_in = (unsigned char*)inBuffer;
-				stream.avail_in = read;
-
-				if(read == 0) {
-					break;
-				}
-
-				// write the result to the file
-				do {
-					inflate(&stream, 0);
-					file.write((char*)outBuffer, outBufferSize - stream.avail_out);
-
-					stream.next_out = outBuffer;
-					stream.avail_out = outBufferSize;
-				}
-				while(stream.avail_in > 0);
-
-				int result;
-				do {
-					result = inflate(&stream, Z_FINISH);
-					file.write((char*)outBuffer, outBufferSize - stream.avail_out);
-
-					stream.next_out = outBuffer;
-					stream.avail_out = outBufferSize;
-				}
-				while(result == Z_OK);
-				
-				inflateEnd(&stream);
-
-				file.close();
-			}
-			
-			break;
-		}
+		file.close();
+	}
+	else { // if we have compression, read from the file buffer
+		ofstream file("output/" + this->getFileName());
+		file.write(this->carton->fileBuffer, this->carton->fileBufferSize);
+		file.close();
 	}
 }

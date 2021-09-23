@@ -26,6 +26,6 @@ namespace carton {
 			bool compress = true;
 
 			void write();
-			void read(Egg &header);
+			void read(Egg &header, unsigned int size);
 	};
 };

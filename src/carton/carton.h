@@ -37,8 +37,9 @@ namespace carton {
 			void initFileBuffer();
 			void deleteFileBuffer();
 			void commitFileBuffer();
-			void commitDeflatedFileBuffer(EggCompressionTypes compression);
+			size_t commitDeflatedFileBuffer(EggCompressionTypes compression);
 			void writeToFileBuffer(char byte);
+			void writeBytesToFileBuffer(char* bytes, size_t size);
 			void readFromFileBuffer(char* output, size_t amount);
 			
 			// write methods
@@ -115,5 +116,9 @@ namespace carton {
 
 				return string(output, size);
 			}
+
+			bool canRead(streampos start, unsigned int size);
+
+			void readDeflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize);
 	};
 };
