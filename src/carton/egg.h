@@ -1,0 +1,44 @@
+#pragma once
+
+namespace carton {
+	enum EggTypes {
+		INVALID_EGG,
+		STRING_TABLE,
+		METADATA,
+		FILE,
+	};
+
+	enum EggCompressionTypes {
+		NO_COMPRESSION,
+		ZLIB_BEST,
+	};
+	
+	struct Egg { // an egg is a block of data
+		unsigned short int type;
+		unsigned int blockSize;
+
+		// if this block is separated into different blocks, then this specifies where its continued
+		// bit 0 is used to determine if this block is a continued one or not
+		unsigned long continuedBlock;
+		unsigned short int compressionType;
+
+		int operator==(const Egg &other) {
+			return this->type == other.type && this->continuedBlock == other.continuedBlock && this->compressionType == other.compressionType;
+		}
+	};
+
+	class EggContents {
+		friend class Carton;
+
+		public:
+			EggContents();
+			EggContents(class Carton* carton);
+			virtual ~EggContents() = 0;
+
+		protected:
+			class Carton* carton = nullptr;
+			
+			virtual void write() = 0;
+			virtual void read(Egg &header) = 0;
+	};
+};

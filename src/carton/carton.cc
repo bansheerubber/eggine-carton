@@ -7,7 +7,7 @@ carton::Carton::Carton() {
 }
 
 void carton::Carton::write(string fileName) {
-	this->file.open(fileName, ios_base::trunc);
+	this->file.open(fileName, ios_base::out);
 
 	const char* magic = "CARTON";
 	this->file.write(magic, 6);
@@ -18,7 +18,56 @@ void carton::Carton::write(string fileName) {
 	for(File* file: this->files) {
 		file->write();
 	}
-	
+
+	this->file.flush();
+	this->file.close();
+}
+
+void carton::Carton::read(string fileName) {
+	this->file.open(fileName, ios_base::in);
+
+	this->file.seekg(0, this->file.end);
+	streampos totalSize = this->file.tellg();
+	this->file.seekg(0, this->file.beg);
+
+	char magic[6];
+	this->file.read(magic, 6);
+
+	if(string(magic) != string("CARTON")) {
+		printf("could not read '%s'\n", fileName.c_str());
+		exit(1);
+	}
+
+	Egg stringTableEgg = this->readEgg();
+	if(stringTableEgg.type != STRING_TABLE) {
+		printf("expected first egg to be string table for '%s'\n", fileName.c_str());
+		exit(1);
+	}
+
+	this->stringTable.read(stringTableEgg); // first block must always be the string table
+
+	Metadata* lastMetadata = nullptr;
+	while(this->file.tellg() < totalSize) {
+		Egg egg = this->readEgg();
+		switch(egg.type) {
+			case METADATA: {
+				lastMetadata = new Metadata(this);
+				lastMetadata->read(egg);
+				break;
+			}
+			
+			case FILE: {
+				(new File(this, lastMetadata))->read(egg);
+				break;
+			}
+
+			default: {
+				printf("unexpected egg type '%d'\n", egg.type);
+				exit(1);
+			}
+		}
+	}
+
 	this->file.close();
 }
 
@@ -26,45 +75,29 @@ void carton::Carton::addFile(File* file) {
 	this->files.push_back(file);
 }
 
-void carton::Carton::writeBytesLittleEndian(void* data, size_t size) {
-	for(int i = size - 1; i >= 0; i--) {
-		this->file.write(((const char*)data + i), 1);
-	}
-}
-
 // write block header
-void carton::Carton::writeEgg(Egg egg) {
-	this->writeData(egg.type);
-	this->writeData(egg.continuedBlock);
-	this->writeData(egg.compressionType);
+streampos carton::Carton::writeEgg(Egg egg) {
+	streampos start = this->file.tellp();
+	
+	this->writeNumber(egg.type);
+	this->writeNumber(egg.blockSize);
+	this->writeNumber(egg.continuedBlock);
+	this->writeNumber(egg.compressionType);
+	return start;
 }
 
-void carton::Carton::writeData(unsigned char data) {
-	this->writeBytesLittleEndian(&data, sizeof(unsigned char));
+void carton::Carton::writeEggSize(unsigned int size, streampos position) {
+	streampos currentPosition = this->file.tellp();
+	this->file.seekp(position + sizeof(unsigned short int));
+	this->writeNumber(size);
+	this->file.seekp(currentPosition);
 }
 
-void carton::Carton::writeData(unsigned short int data) {
-	this->writeBytesLittleEndian(&data, sizeof(unsigned short int));
-}
-
-void carton::Carton::writeData(unsigned long data) {
-	this->writeBytesLittleEndian(&data, sizeof(unsigned long));
-}
-
-void carton::Carton::writeData(const char* data, unsigned char size) {
-	this->writeData(size);
-	this->file.write(data, size);
-}
-
-void carton::Carton::writeData(const char* data, unsigned short size) {
-	this->writeData(size);
-	this->file.write(data, size);
-}
-
-void carton::Carton::concatData(ifstream &stream) {
-	this->file << stream.rdbuf();
-}
-
-void carton::Carton::concatData(zstr::ostream &stream) {
-	this->file << stream.rdbuf();
+carton::Egg carton::Carton::readEgg() {
+	return Egg {
+		type: this->readNumber<unsigned short int>(),
+		blockSize: this->readNumber<unsigned int>(),
+		continuedBlock: this->readNumber<unsigned long>(),
+		compressionType: this->readNumber<unsigned short int>(),
+	};
 }
