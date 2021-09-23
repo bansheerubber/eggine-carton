@@ -69,25 +69,10 @@ void carton::File::read(Egg &header, unsigned int size) {
 	this->setFileName(this->metadata->getMetadata("fileName"));
 	
 	if(header.compressionType == NO_COMPRESSION) { // if we have no compression, read from the file pointer
-		const size_t inBufferSize = 1 << 20; // read a megabyte at a time
-		char inBuffer[inBufferSize];
-
-		ofstream file("output/" + this->getFileName());
-		streampos start = this->carton->file.tellg();
-		size_t readBytes = 0;
-		while(readBytes != header.blockSize) {
-			this->carton->file.read(inBuffer, min(header.blockSize - readBytes, inBufferSize));
-			size_t read = this->carton->file.gcount();
-			readBytes += read;
-
-			file.write(inBuffer, read);
-		}
-
-		file.close();
+		this->carton->readFromFileIntoFileBuffer(size);
 	}
-	else { // if we have compression, read from the file buffer
-		ofstream file("output/" + this->getFileName());
-		file.write(this->carton->fileBuffer, this->carton->fileBufferSize);
-		file.close();
-	}
+
+	ofstream file("output/" + this->getFileName());
+	file.write(this->carton->fileBuffer, this->carton->fileBufferSize);
+	file.close();
 }

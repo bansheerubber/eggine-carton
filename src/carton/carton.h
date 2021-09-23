@@ -41,6 +41,7 @@ namespace carton {
 			void writeToFileBuffer(char byte);
 			void writeBytesToFileBuffer(char* bytes, size_t size);
 			void readFromFileBuffer(char* output, size_t amount);
+			void readFromFileIntoFileBuffer(size_t amount);
 			
 			// write methods
 			streampos writeEgg(Egg egg);

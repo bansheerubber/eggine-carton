@@ -258,6 +258,17 @@ void carton::Carton::readFromFileBuffer(char* output, size_t amount) {
 	}
 }
 
+void carton::Carton::readFromFileIntoFileBuffer(size_t amount) {
+	this->initFileBuffer();
+	while(this->fileBufferSize < amount) {
+		this->fileBufferSize = this->fileBufferSize * 2; // new size
+		this->fileBuffer = (char*)realloc(this->fileBuffer, sizeof(char) * this->fileBufferSize);
+	}
+
+	this->file.read(this->fileBuffer, amount);
+	this->fileBufferSize = amount;
+}
+
 bool carton::Carton::canRead(streampos start, unsigned int size) {
 	if(this->fileBufferSize != 0) {
 		return this->fileBufferPointer < size;

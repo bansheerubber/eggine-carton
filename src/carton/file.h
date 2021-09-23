@@ -23,7 +23,7 @@ namespace carton {
 		
 		private:
 			string fileName;
-			bool compress = true;
+			bool compress = false;
 
 			void write();
 			void read(Egg &header, unsigned int size);
