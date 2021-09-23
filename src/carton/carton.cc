@@ -190,3 +190,46 @@ size_t carton::Carton::writeDeflated(istream &input, EggCompressionTypes level) 
 size_t carton::Carton::writeDeflated(char* buffer, size_t size, EggCompressionTypes level) {
 	return __writeDeflated(this, nullptr, buffer, size, level);
 }
+
+void carton::Carton::initFileBuffer() {
+	this->deleteFileBuffer();
+
+	this->fileBufferSize = 1024;
+	this->fileBufferPointer = 0;
+	this->fileBuffer = new char[this->fileBufferSize];
+}
+
+void carton::Carton::deleteFileBuffer() {
+	if(this->fileBuffer != nullptr) {
+		delete this->fileBuffer;
+	}
+
+	this->fileBuffer = nullptr;
+	this->fileBufferSize = 0;
+	this->fileBufferPointer = 0;
+}
+
+void carton::Carton::commitFileBuffer() {
+	this->file.write(this->fileBuffer, this->fileBufferPointer);
+	this->deleteFileBuffer();
+}
+
+void carton::Carton::commitDeflatedFileBuffer(EggCompressionTypes compression) {
+	this->writeDeflated(this->fileBuffer, this->fileBufferPointer, compression);
+	this->deleteFileBuffer();
+}
+
+void carton::Carton::writeToFileBuffer(char byte) {
+	this->fileBuffer[this->fileBufferPointer] = byte;
+	this->fileBufferPointer++;
+	
+	if(this->fileBufferPointer == this->fileBufferSize) { // resize buffer
+		this->fileBuffer = (char*)realloc(this->fileBuffer, sizeof(char) * this->fileBufferSize * 2);
+	}
+}
+
+void carton::Carton::readFromFileBuffer(char* output, size_t amount) {
+	for(size_t i = 0; i < amount; i++) {
+		output[i] = this->fileBuffer[this->fileBufferPointer++];
+	}
+}

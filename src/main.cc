@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
 	carton::File* file = new carton::File(&carton);
 	file->setFileName("spritesheet.png");
 
-	carton.addFile(file);
+	// carton.addFile(file);
 	carton.write("test.carton");
 
 	// carton.read("test.carton");

@@ -31,8 +31,11 @@ void carton::StringTable::write() {
 		type: STRING_TABLE,
 		blockSize: 0,
 		continuedBlock: 0,
-		compressionType: 0,
+		compressionType: ZLIB_LEVEL_9,
 	});
+
+	// write to file buffer
+	this->carton->initFileBuffer();
 
 	unsigned int totalSize = 0;
 	for(auto &[key, value]: this->table) {
@@ -40,6 +43,8 @@ void carton::StringTable::write() {
 		string_table_string_length size = (string_table_string_length)min(key.length(), (size_t)STRING_TABLE_MAX_STRING_LENGTH); // only allow strings of size 0-255 in key string table
 		totalSize += this->carton->writeString(key.c_str(), size); // write string
 	}
+
+	this->carton->commitDeflatedFileBuffer(ZLIB_LEVEL_9);
 
 	this->carton->writeEggSize(totalSize, eggPosition);
 }

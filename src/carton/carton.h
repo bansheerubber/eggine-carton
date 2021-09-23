@@ -29,6 +29,17 @@ namespace carton {
 			fstream file;
 			StringTable stringTable = StringTable(this);
 			vector<class File*> files;
+
+			char* fileBuffer = nullptr; // home for temp data, we can write/read from it using the write/read commands
+			size_t fileBufferSize = 0;
+			size_t fileBufferPointer = 0;
+
+			void initFileBuffer();
+			void deleteFileBuffer();
+			void commitFileBuffer();
+			void commitDeflatedFileBuffer(EggCompressionTypes compression);
+			void writeToFileBuffer(char byte);
+			void readFromFileBuffer(char* output, size_t amount);
 			
 			// write methods
 			streampos writeEgg(Egg egg);
@@ -37,7 +48,13 @@ namespace carton {
 			template<class T>
 			unsigned int writeNumber(T number) {
 				for(int i = sizeof(T) - 1; i >= 0; i--) {
-					this->file.write(((const char*)&number + i), 1);
+					if(this->fileBufferSize != 0) {
+						char byte = ((const char*)&number + i)[0]; // shout-out to reverse engineering for teaching me the absolutely correct way of doing this
+						this->writeToFileBuffer(byte);
+					}
+					else {
+						this->file.write(((const char*)&number + i), 1);
+					}
 				}
 				return sizeof(T);
 			}
@@ -45,7 +62,16 @@ namespace carton {
 			template<class T>
 			unsigned int writeString(const char* data, T size) {
 				this->writeNumber<T>(size);
-				this->file.write(data, size);
+
+				if(this->fileBufferSize != 0) {
+					for(T i = 0; i < size; i++) {
+						this->writeToFileBuffer(data[i]);
+					}
+				}
+				else {
+					this->file.write(data, size);
+				}
+				
 				return sizeof(T) + size;
 			}
 
@@ -58,7 +84,14 @@ namespace carton {
 			template<class T>
 			T readNumber() {
 				char bytes[sizeof(T)];
-				this->file.read(bytes, sizeof(T));
+
+				if(this->fileBufferSize != 0) {
+					this->readFromFileBuffer(bytes, sizeof(T));
+				}
+				else {
+					this->file.read(bytes, sizeof(T));
+				}
+				
 				char reversed[sizeof(T)];
 				for(int i = sizeof(T) - 1, j = 0; i >= 0; i--, j++) {
 					reversed[j] = bytes[i];
@@ -72,7 +105,14 @@ namespace carton {
 				// read the size of the string
 				T size = this->readNumber<T>();
 				char output[size];
-				this->file.read(output, size);
+
+				if(this->fileBufferSize != 0) {
+					this->readFromFileBuffer(output, size);
+				}
+				else {
+					this->file.read(output, size);
+				}
+
 				return string(output, size);
 			}
 	};
