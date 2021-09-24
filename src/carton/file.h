@@ -24,6 +24,7 @@ namespace carton {
 		private:
 			string fileName;
 			bool compress = false;
+			char* contents = nullptr; // contents of the file in memory
 
 			void write();
 			void read(Egg &header, unsigned int size);

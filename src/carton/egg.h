@@ -6,6 +6,7 @@ namespace carton {
 		STRING_TABLE,
 		METADATA,
 		FILE,
+		FILE_LIST,
 	};
 
 	enum EggCompressionTypes {

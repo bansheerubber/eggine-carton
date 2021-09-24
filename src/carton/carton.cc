@@ -16,12 +16,17 @@ void carton::Carton::write(string fileName) {
 	const char* magic = "CARTON";
 	this->file.write(magic, 6);
 
+	unsigned long fileListPointer = 0;
+	this->writeNumber(fileListPointer);
+
 	this->stringTable.write();
 
 	// write files
 	for(File* file: this->files) {
 		file->write();
 	}
+
+	this->fileList.write();
 
 	this->file.flush();
 	this->file.close();
@@ -42,44 +47,23 @@ void carton::Carton::read(string fileName) {
 		exit(1);
 	}
 
-	Metadata* lastMetadata = nullptr;
-	while(this->file.tellg() < totalSize) {
-		Egg egg = this->readEgg();
+	unsigned long fileListPointer = this->readNumber<unsigned long>();
 
-		unsigned int size = egg.blockSize;
-		if(egg.compressionType != NO_COMPRESSION) {
-			this->readDeflatedIntoFileBuffer((EggCompressionTypes)egg.compressionType, egg.blockSize);
-			this->fileBufferSize = this->fileBufferPointer;
-			this->fileBufferPointer = 0;
-			size = this->fileBufferSize;
-		}
+	// read the string table
+	if(&this->stringTable != this->parseEggContents()) {
+		printf("expected string table for '%s'\n", fileName.c_str());
+	}
 
-		switch(egg.type) {
-			case STRING_TABLE: {
-				this->stringTable.read(egg, size);
-				break;
-			}
-			
-			case METADATA: {
-				lastMetadata = new Metadata(this);
-				lastMetadata->read(egg, size);
-				break;
-			}
-			
-			case FILE: {
-				(new File(this, lastMetadata))->read(egg, size);
-				break;
-			}
+	// read the file list
+	this->file.seekg(fileListPointer);
+	if(&this->fileList != this->parseEggContents()) {
+		printf("expected file list for '%s'\n", fileName.c_str());
+	}
 
-			default: {
-				printf("unexpected egg type '%d'\n", egg.type);
-				exit(1);
-			}
-		}
-
-		if(egg.compressionType != NO_COMPRESSION) {
-			this->deleteFileBuffer(); // clean up the mess
-		}
+	// loop through file list and read file metadata to build lookup tables
+	for(auto &[fileName, position]: this->fileList.filePositions) {
+		this->file.seekg(position);
+		Metadata* metadata = (Metadata*)this->parseEggContents();
 	}
 
 	this->file.close();
@@ -114,6 +98,56 @@ carton::Egg carton::Carton::readEgg() {
 		continuedBlock: this->readNumber<unsigned long>(),
 		compressionType: this->readNumber<unsigned short int>(),
 	};
+}
+
+carton::EggContents* carton::Carton::parseEggContents() {
+	Egg egg = this->readEgg();
+	EggContents* output = nullptr;
+
+	unsigned int size = egg.blockSize;
+	if(egg.compressionType != NO_COMPRESSION) {
+		this->readDeflatedIntoFileBuffer((EggCompressionTypes)egg.compressionType, egg.blockSize);
+		this->fileBufferSize = this->fileBufferPointer;
+		this->fileBufferPointer = 0;
+		size = this->fileBufferSize;
+	}
+
+	switch(egg.type) {
+		case STRING_TABLE: {
+			this->stringTable.read(egg, size);
+			output = &this->stringTable;
+			break;
+		}
+		
+		case METADATA: {
+			output = new Metadata(this);
+			output->read(egg, size);
+			break;
+		}
+		
+		case FILE: {
+			output = new File(this);
+			output->read(egg, size);
+			break;
+		}
+
+		case FILE_LIST: {
+			this->fileList.read(egg, size);
+			output = &this->fileList;
+			break;
+		}
+
+		default: {
+			printf("unexpected egg type '%d'\n", egg.type);
+			exit(1);
+		}
+	}
+
+	if(egg.compressionType != NO_COMPRESSION) {
+		this->deleteFileBuffer(); // clean up the mess
+	}
+
+	return output;
 }
 
 size_t carton::__writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level) {

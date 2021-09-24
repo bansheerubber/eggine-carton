@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "egg.h"
+#include "fileList.h"
 #include "stringTable.h"
 
 using namespace std;
@@ -12,6 +13,7 @@ using namespace std;
 namespace carton {
 	class Carton {
 		friend class File;
+		friend class FileList;
 		friend class Metadata;
 		friend StringTable;
 		friend size_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level);
@@ -28,6 +30,9 @@ namespace carton {
 		private:
 			fstream file;
 			StringTable stringTable = StringTable(this);
+			FileList fileList = FileList(this);
+			unsigned long fileListPointerPosition = 6;
+
 			vector<class File*> files;
 
 			char* fileBuffer = nullptr; // home for temp data, we can write/read from it using the write/read commands
@@ -82,6 +87,7 @@ namespace carton {
 
 			// read methods
 			Egg readEgg();
+			EggContents* parseEggContents();
 
 			template<class T>
 			T readNumber() {

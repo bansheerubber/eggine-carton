@@ -1,8 +1,10 @@
 #include "file.h"
 
+#include <cstring>
 #include <fstream>
 
 #include "carton.h"
+#include "fileList.h"
 #include "metadata.h"
 
 carton::File::File(Carton* carton) : EggContents(carton) {
@@ -16,8 +18,8 @@ carton::File::File(Carton* carton, Metadata* metadata) : EggContents(carton) {
 }
 
 carton::File::~File() {
-	if(this->metadata != nullptr) {
-		delete this->metadata;
+	if(this->contents != nullptr) {
+		delete this->contents;
 	}
 }
 
@@ -42,6 +44,7 @@ void carton::File::write() {
 			continuedBlock: 0,
 			compressionType: level,
 		});
+		this->carton->fileList.addFile(eggPosition, this->fileName);
 
 		ifstream file(this->fileName);
 		size_t deflatedSize = this->carton->writeDeflated(file, level);
@@ -56,6 +59,7 @@ void carton::File::write() {
 			continuedBlock: 0,
 			compressionType: NO_COMPRESSION,
 		});
+		this->carton->fileList.addFile(eggPosition, this->fileName);
 
 		streampos start = this->carton->file.tellp();
 		ifstream file(this->fileName);
@@ -72,7 +76,14 @@ void carton::File::read(Egg &header, unsigned int size) {
 		this->carton->readFromFileIntoFileBuffer(size);
 	}
 
-	ofstream file("output/" + this->getFileName());
-	file.write(this->carton->fileBuffer, this->carton->fileBufferSize);
-	file.close();
+	if(this->contents != nullptr) {
+		delete this->contents;
+	}
+
+	this->contents = new char[this->carton->fileBufferSize];
+	memcpy(this->contents, this->carton->fileBuffer, this->carton->fileBufferSize); // copy into our content buffer
+
+	if(header.compressionType == NO_COMPRESSION) {
+		this->carton->deleteFileBuffer();
+	}
 }
