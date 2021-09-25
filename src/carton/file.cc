@@ -44,7 +44,7 @@ void carton::File::write() {
 			continuedBlock: 0,
 			compressionType: level,
 		});
-		this->carton->fileList.addFile(eggPosition, this->fileName);
+		this->carton->fileList.addFile(this->metadata->position, this->fileName);
 
 		ifstream file(this->fileName);
 		size_t deflatedSize = this->carton->writeDeflated(file, level);
@@ -59,7 +59,7 @@ void carton::File::write() {
 			continuedBlock: 0,
 			compressionType: NO_COMPRESSION,
 		});
-		this->carton->fileList.addFile(eggPosition, this->fileName);
+		this->carton->fileList.addFile(this->metadata->position, this->fileName);
 
 		streampos start = this->carton->file.tellp();
 		ifstream file(this->fileName);

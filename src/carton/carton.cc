@@ -16,6 +16,9 @@ void carton::Carton::write(string fileName) {
 	const char* magic = "CARTON";
 	this->file.write(magic, 6);
 
+	this->writeNumber(this->version);
+
+	this->fileListPointerPosition = this->file.tellp();
 	unsigned long fileListPointer = 0;
 	this->writeNumber(fileListPointer);
 
@@ -44,6 +47,12 @@ void carton::Carton::read(string fileName) {
 
 	if(string(magic) != string("CARTON")) {
 		printf("could not read '%s'\n", fileName.c_str());
+		exit(1);
+	}
+
+	unsigned int version = this->readNumber<unsigned int>();
+	if(this->version != version) {
+		printf("version mismatch: %u != %u\n", this->version, version);
 		exit(1);
 	}
 

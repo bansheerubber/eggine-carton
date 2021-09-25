@@ -2,13 +2,27 @@
 
 #include "carton.h"
 
+carton::Metadata::Metadata(Carton* carton) : EggContents(carton) {
+	carton->database.addMetadata(this);
+}
+
 void carton::Metadata::addMetadata(string key, string value) {
 	this->metadata[key] = value;
 	this->carton->stringTable.addString(key);
 }
 
 string carton::Metadata::getMetadata(string key) {
-	return this->metadata[key];
+	auto it = this->metadata.find(key);
+	if(it == this->metadata.end()) {
+		return "";
+	}
+	else {
+		return it.value();
+	}
+}
+
+bool carton::Metadata::hasMetadata(string key) {
+	return this->metadata.find(key) != this->metadata.end();
 }
 
 void carton::Metadata::write() {
@@ -18,6 +32,8 @@ void carton::Metadata::write() {
 		continuedBlock: 0,
 		compressionType: 0,
 	});
+
+	this->position = eggPosition;
 
 	unsigned int totalSize = 0;
 	for(auto &[key, value]: this->metadata) {

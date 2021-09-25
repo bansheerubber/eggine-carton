@@ -6,6 +6,7 @@
 
 #include "egg.h"
 #include "fileList.h"
+#include "metadata/metadataDatabase.h"
 #include "stringTable.h"
 
 using namespace std;
@@ -26,12 +27,16 @@ namespace carton {
 			void write(string fileName);
 			void read(string fileName);
 			void addFile(class File* file);
+
+			MetadataDatabase database = MetadataDatabase(this);
 		
 		private:
+			const unsigned int version = 1;
+			
 			fstream file;
 			StringTable stringTable = StringTable(this);
 			FileList fileList = FileList(this);
-			unsigned long fileListPointerPosition = 6;
+			unsigned long fileListPointerPosition = 0;
 
 			vector<class File*> files;
 

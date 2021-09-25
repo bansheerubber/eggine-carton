@@ -15,13 +15,16 @@ namespace carton {
 		friend class File;
 		
 		public:
-			using EggContents::EggContents;
+			Metadata(Carton* carton);
 
 			void addMetadata(string key, string value);
 			string getMetadata(string key);
+			bool hasMetadata(string key);
 
 		private:
 			tsl::robin_map<string, string> metadata;
+
+			streampos position;
 
 			void write();
 			void read(Egg &header, unsigned int size);
