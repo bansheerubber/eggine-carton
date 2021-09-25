@@ -9,7 +9,7 @@
 int main(int argc, char* argv[]) {
 	carton::Carton carton;
 
-	// for(int i = 0; i < 50; i++) {
+	// for(int i = 0; i < 100000; i++) {
 	// 	carton::File* file = new carton::File(&carton);
 	// 	file->setFileName("spritesheet.png");
 
@@ -20,10 +20,10 @@ int main(int argc, char* argv[]) {
 
 	carton.read("test.carton");
 
-	tsl::robin_set<carton::Metadata*> test = carton.database.get()->has("fileName")->exec();
-	for(carton::Metadata* metadata: test) {
-		printf("%s\n", metadata->getMetadata("fileName").c_str());
-	}
+	DynamicArray<carton::Metadata*, void> test = carton.database.get()->has("fileName")->exec();
+	// for(size_t i = 0; i < test.head; i++) {
+	// 	printf("%s\n", test[i]->getMetadata("fileName").c_str());
+	// }
 	
 	return 0;
 }

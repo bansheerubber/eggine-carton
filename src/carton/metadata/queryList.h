@@ -1,8 +1,9 @@
 #pragma once
 
-#include <tsl/robin_set.h>
 #include <string>
 #include <vector>
+
+#include "../../util/dynamicArray.h"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ namespace carton {
 				
 				QueryList* equals(string key, string test);
 				QueryList* has(string key);
-				tsl::robin_set<Metadata*> exec();
+				DynamicArray<Metadata*> exec(); // dynamic array utility class has faster insert than std::vector
 			
 			private:
 				MetadataDatabase* database;
