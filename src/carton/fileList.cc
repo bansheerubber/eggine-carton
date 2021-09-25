@@ -3,7 +3,7 @@
 #include "carton.h"
 
 void carton::FileList::addFile(streampos position, string fileName) {
-	this->filePositions[fileName] = position;
+	this->filePositions.push_back(pair<string, streampos>(fileName, position));
 }
 
 void carton::FileList::write() {
