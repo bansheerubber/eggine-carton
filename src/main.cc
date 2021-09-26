@@ -6,13 +6,13 @@
 #include "carton/file.h"
 #include "carton/metadata/queryList.h"
 
-void frog(carton::File* file, const char* buffer, size_t bufferSize) {
+void frog(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
 	printf("handled file %s\n", file->getFileName().c_str());
 }
 
 int main(int argc, char* argv[]) {
 	carton::Carton carton;
-	carton.addExtensionHandler(".png", &frog);
+	carton.addExtensionHandler(".png", &frog, nullptr);
 
 	// carton::File* file = new carton::File(&carton);
 	// file->setFileName("spritesheet.png");

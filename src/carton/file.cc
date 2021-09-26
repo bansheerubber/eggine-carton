@@ -83,7 +83,7 @@ void carton::File::read(Egg &header, unsigned int size) {
 
 	auto it = this->carton->extensionHandlers.find(filesystem::path(this->getFileName()).extension());
 	if(it != this->carton->extensionHandlers.end()) {
-		(*it.value())(this, this->carton->fileBuffer, this->carton->fileBufferSize);
+		(*it.value().first)(it.value().second, this, this->carton->fileBuffer, this->carton->fileBufferSize);
 	}
 
 	if(this->shouldDeleteAfterRead) {

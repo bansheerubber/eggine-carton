@@ -14,7 +14,7 @@
 using namespace std;
 
 namespace carton {
-	typedef void (*file_extension_handler)(class File* file, const char* buffer, size_t fileBufferSize);
+	typedef void (*file_extension_handler)(void* owner, class File* file, const char* buffer, size_t fileBufferSize);
 	
 	class Carton {
 		friend class File;
@@ -35,7 +35,7 @@ namespace carton {
 			void read(string fileName);
 			void addFile(class File* file);
 			class File* readFile(string fileName);
-			void addExtensionHandler(string extension, file_extension_handler handler);
+			void addExtensionHandler(string extension, file_extension_handler handler, void* owner);
 
 			MetadataDatabase database = MetadataDatabase(this);
 		
@@ -49,7 +49,7 @@ namespace carton {
 
 			vector<class File*> files;
 
-			tsl::robin_map<string, file_extension_handler> extensionHandlers;
+			tsl::robin_map<string, pair<file_extension_handler, void*>> extensionHandlers;
 
 			char* fileBuffer = nullptr; // home for temp data, we can write/read from it using the write/read commands
 			size_t fileBufferSize = 0;
