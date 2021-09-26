@@ -2,7 +2,6 @@
 
 #include <tsl/robin_map.h>
 #include <string>
-#include <vector>
 
 #include "egg.h"
 
@@ -20,7 +19,7 @@ namespace carton {
 			void addFile(streampos position, string fileName);
 
 		private:
-			vector<pair<string, streampos>> filePositions;
+			tsl::robin_map<string, streampos> filePositions;
 
 			void write();
 			void read(Egg &header, unsigned int size);
