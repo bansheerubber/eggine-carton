@@ -45,7 +45,7 @@ void carton::Carton::read(string fileName) {
 	char magic[6];
 	this->file.read(magic, 6);
 
-	if(string(magic) != string("CARTON")) {
+	if(string(magic, 6) != string("CARTON")) {
 		printf("could not read '%s'\n", fileName.c_str());
 		exit(1);
 	}
@@ -87,8 +87,8 @@ carton::File* carton::Carton::readFile(string fileName) {
 	return file;
 }
 
-void carton::Carton::addExtensionHandler(string extension, file_extension_handler handler) {
-	this->extensionHandlers[extension] = handler;
+void carton::Carton::addExtensionHandler(string extension, file_extension_handler handler, void* owner) {
+	this->extensionHandlers[extension] = pair(handler, owner);
 }
 
 // write block header
