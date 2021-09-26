@@ -2,6 +2,8 @@
 
 #include <fstream>
 #include <string>
+#include <tsl/robin_map.h>
+#include <tsl/robin_set.h>
 #include <vector>
 
 #include "egg.h"
@@ -12,6 +14,8 @@
 using namespace std;
 
 namespace carton {
+	typedef void (*file_extension_handler)(class File* file, const char* buffer, size_t fileBufferSize);
+	
 	class Carton {
 		friend class File;
 		friend class FileList;
@@ -22,11 +26,16 @@ namespace carton {
 		public:
 			Carton();
 
-			vector<EggContents*> contents;
+			tsl::robin_set<EggContents*> contents;
+			tsl::robin_map<unsigned long, EggContents*> positionToContents;
+			tsl::robin_map<EggContents*, unsigned long> contentsToEnd;
+			tsl::robin_map<unsigned long, EggContents*> endToContents;
 
 			void write(string fileName);
 			void read(string fileName);
 			void addFile(class File* file);
+			class File* readFile(string fileName);
+			void addExtensionHandler(string extension, file_extension_handler handler);
 
 			MetadataDatabase database = MetadataDatabase(this);
 		
@@ -39,6 +48,8 @@ namespace carton {
 			unsigned long fileListPointerPosition = 0;
 
 			vector<class File*> files;
+
+			tsl::robin_map<string, file_extension_handler> extensionHandlers;
 
 			char* fileBuffer = nullptr; // home for temp data, we can write/read from it using the write/read commands
 			size_t fileBufferSize = 0;

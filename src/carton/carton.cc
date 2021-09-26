@@ -74,12 +74,21 @@ void carton::Carton::read(string fileName) {
 		this->file.seekg(position);
 		Metadata* metadata = (Metadata*)this->parseEggContents();
 	}
-
-	this->file.close();
 }
 
 void carton::Carton::addFile(File* file) {
 	this->files.push_back(file);
+}
+
+carton::File* carton::Carton::readFile(string fileName) {
+	this->file.seekg(this->fileList.getFile(fileName));
+	Metadata* metadata = (Metadata*)this->parseEggContents();
+	File* file = (File*)this->parseEggContents();
+	return file;
+}
+
+void carton::Carton::addExtensionHandler(string extension, file_extension_handler handler) {
+	this->extensionHandlers[extension] = handler;
 }
 
 // write block header
@@ -110,6 +119,14 @@ carton::Egg carton::Carton::readEgg() {
 }
 
 carton::EggContents* carton::Carton::parseEggContents() {
+	streampos start = this->file.tellg();
+
+	auto it = this->positionToContents.find(start);
+	if(it != this->positionToContents.end()) {
+		this->file.seekg(this->contentsToEnd[it.value()]);
+		return it.value();
+	}
+	
 	Egg egg = this->readEgg();
 	EggContents* output = nullptr;
 
@@ -135,7 +152,7 @@ carton::EggContents* carton::Carton::parseEggContents() {
 		}
 		
 		case FILE: {
-			output = new File(this);
+			output = new File(this, (Metadata*)this->endToContents[start]);
 			output->read(egg, size);
 			break;
 		}
@@ -147,9 +164,14 @@ carton::EggContents* carton::Carton::parseEggContents() {
 		}
 
 		default: {
-			printf("unexpected egg type '%d'\n", egg.type);
 			exit(1);
 		}
+	}
+
+	if(this->contents.find(output) != this->contents.end()) { // make sure it wasn't deleted
+		this->positionToContents[start] = output;
+		this->contentsToEnd[output] = this->file.tellg();
+		this->endToContents[this->file.tellg()] = output;
 	}
 
 	if(egg.compressionType != NO_COMPRESSION) {

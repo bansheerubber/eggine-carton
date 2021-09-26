@@ -1,6 +1,7 @@
 #include "file.h"
 
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 
 #include "carton.h"
@@ -80,10 +81,24 @@ void carton::File::read(Egg &header, unsigned int size) {
 		delete this->contents;
 	}
 
-	this->contents = new char[this->carton->fileBufferSize];
-	memcpy(this->contents, this->carton->fileBuffer, this->carton->fileBufferSize); // copy into our content buffer
+	auto it = this->carton->extensionHandlers.find(filesystem::path(this->getFileName()).extension());
+	if(it != this->carton->extensionHandlers.end()) {
+		(*it.value())(this, this->carton->fileBuffer, this->carton->fileBufferSize);
+	}
+
+	if(this->shouldDeleteAfterRead) {
+		delete this;
+	}
+	else {
+		this->contents = new char[this->carton->fileBufferSize];
+		memcpy(this->contents, this->carton->fileBuffer, this->carton->fileBufferSize); // copy into our content buffer
+	}
 
 	if(header.compressionType == NO_COMPRESSION) {
 		this->carton->deleteFileBuffer();
 	}
+}
+
+void carton::File::saveToCachedBuffer() {
+	this->shouldDeleteAfterRead = false;
 }

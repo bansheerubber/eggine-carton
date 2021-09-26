@@ -6,6 +6,10 @@ void carton::FileList::addFile(streampos position, string fileName) {
 	this->filePositions[fileName] = position;
 }
 
+streampos carton::FileList::getFile(string fileName) {
+	return this->filePositions[fileName];
+}
+
 void carton::FileList::write() {
 	streampos eggPosition = this->carton->writeEgg(Egg {
 		type: FILE_LIST,

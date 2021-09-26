@@ -17,9 +17,10 @@ namespace carton {
 			using EggContents::EggContents;
 
 			void addFile(streampos position, string fileName);
+			streampos getFile(string fileName);
 
 		private:
-			tsl::robin_map<string, streampos> filePositions;
+			tsl::robin_map<string, unsigned long> filePositions;
 
 			void write();
 			void read(Egg &header, unsigned int size);

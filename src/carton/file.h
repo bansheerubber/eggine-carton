@@ -20,10 +20,13 @@ namespace carton {
 			Metadata* metadata = nullptr;
 			void setFileName(string fileName);
 			string getFileName();
+
+			void saveToCachedBuffer(); // prevent the file from deleting itself after reading its contents and sending them through extension handler
 		
 		private:
 			string fileName;
 			bool compress = false;
+			bool shouldDeleteAfterRead = true;
 			char* contents = nullptr; // contents of the file in memory
 
 			void write();
