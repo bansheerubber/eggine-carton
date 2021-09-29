@@ -30,7 +30,6 @@ void carton::File::setFileName(string fileName) {
 	// remove packing directory if there is one
 	if(this->carton->packingDirectory.length()) {
 		fileName = fileName.replace(fileName.begin(), fileName.begin() + this->carton->packingDirectory.length() + 1, "");
-		printf("new filename %s\n", fileName.c_str());
 	}
 	this->metadata->addMetadata("fileName", fileName);
 	this->metadata->addMetadata("extension", filesystem::path(fileName).extension());
@@ -52,7 +51,7 @@ void carton::File::write() {
 			continuedBlock: 0,
 			compressionType: level,
 		});
-		this->carton->fileList.addFile(this->metadata->position, this->fileName);
+		this->carton->fileList.addFile(this->metadata->position, this->metadata->getMetadata("fileName"));
 
 		ifstream file(this->fileName);
 		size_t deflatedSize = this->carton->writeDeflated(file, level);
@@ -67,7 +66,7 @@ void carton::File::write() {
 			continuedBlock: 0,
 			compressionType: NO_COMPRESSION,
 		});
-		this->carton->fileList.addFile(this->metadata->position, this->fileName);
+		this->carton->fileList.addFile(this->metadata->position, this->metadata->getMetadata("fileName"));
 
 		streampos start = this->carton->file.tellp();
 		ifstream file(this->fileName);
