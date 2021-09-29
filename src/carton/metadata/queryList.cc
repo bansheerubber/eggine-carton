@@ -27,10 +27,8 @@ carton::metadata::QueryList* carton::metadata::QueryList::has(string key) {
 	return this;
 }
 
-DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec() {
+DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec(bool debug) {
 	DynamicArray<carton::Metadata*> output(nullptr, 16, nullptr, nullptr);
-
-	const bool debug = true;
 
 	unsigned long long start = chrono::duration_cast<chrono::microseconds>(
 		chrono::high_resolution_clock::now().time_since_epoch()
@@ -52,9 +50,14 @@ DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec() {
 	}
 
 	if(debug) {
-		printf("query time: %lldus\n", chrono::duration_cast<chrono::microseconds>(
+		unsigned long long duration = chrono::duration_cast<chrono::microseconds>(
 			chrono::high_resolution_clock::now().time_since_epoch()
-		).count() - start);
+		).count() - start;
+
+		printf("Query Results (%lluus):\n", duration);
+		for(size_t i = 0; i < output.head; i++) {
+			printf("  - filename: %s\n", output[i]->getMetadata("fileName").c_str());
+		}
 	}
 
 	delete this;

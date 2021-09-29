@@ -19,7 +19,7 @@ namespace carton {
 				
 				QueryList* equals(string key, string test);
 				QueryList* has(string key);
-				DynamicArray<Metadata*> exec(); // dynamic array utility class has faster insert than std::vector
+				DynamicArray<Metadata*> exec(bool debug = false); // dynamic array utility class has faster insert than std::vector
 			
 			private:
 				MetadataDatabase* database;
