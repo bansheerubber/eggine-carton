@@ -81,7 +81,7 @@ void carton::File::write() {
 
 void carton::File::read(Egg &header, unsigned int size) {
 	this->setFileName(this->metadata->getMetadata("fileName"));
-	
+
 	if(header.compressionType == NO_COMPRESSION) { // if we have no compression, read from the file pointer
 		this->carton->readFromFileIntoFileBuffer(size);
 	}
@@ -93,6 +93,14 @@ void carton::File::read(Egg &header, unsigned int size) {
 	auto it = this->carton->extensionHandlers.find(filesystem::path(this->getFileName()).extension());
 	if(it != this->carton->extensionHandlers.end()) {
 		(*it.value().first)(it.value().second, this, this->carton->fileBuffer, this->carton->fileBufferSize);
+	}
+
+	if(this->carton->shouldExport) {
+		string output = this->carton->exportDirectory + "/" + this->fileName;
+		filesystem::create_directories(filesystem::path(output).parent_path());
+		ofstream file(output);
+		file.write(this->carton->fileBuffer, this->carton->fileBufferSize);
+		file.close();
 	}
 
 	if(this->shouldDeleteAfterRead) {

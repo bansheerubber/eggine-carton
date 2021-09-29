@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 		
 		for(size_t i = 2; i < argc; i++) {
 			if(!filesystem::exists(argv[i])) {
-				printf("file or directory %s doesn't exist\n", argv[i]);
+				printf("File or directory %s doesn't exist\n", argv[i]);
 			}
 			else if(filesystem::is_directory(argv[i])) {
 				packDirectory(carton, string(argv[i]));
@@ -54,14 +54,21 @@ int main(int argc, char* argv[]) {
 				packFile(carton, string(argv[i]));
 			}
 			else {
-				printf("could not understand file %s\n", argv[i]);
+				printf("Could not understand file %s\n", argv[i]);
 			}
 		}
 
 		carton.write("out.carton");
 	}
 	else if(string(argv[1]) == "unpack") {
-		
+		if(argc < 3) {
+			printf("Please specify a file to unpack\n");
+			goto help;
+		}
+
+		carton::Carton carton;
+		carton.read(string(argv[2]));
+		carton.exportFiles();
 	}
 	else {
 		goto help;

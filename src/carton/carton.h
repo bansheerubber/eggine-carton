@@ -35,6 +35,7 @@ namespace carton {
 			void read(string fileName);
 			void addFile(class File* file);
 			class File* readFile(string fileName);
+			void exportFiles();
 			void addExtensionHandler(string extension, file_extension_handler handler, void* owner);
 
 			MetadataDatabase database = MetadataDatabase(this);
@@ -54,6 +55,9 @@ namespace carton {
 			char* fileBuffer = nullptr; // home for temp data, we can write/read from it using the write/read commands
 			size_t fileBufferSize = 0;
 			size_t fileBufferPointer = 0;
+
+			bool shouldExport = false;
+			string exportDirectory = "output";
 
 			void initFileBuffer();
 			void deleteFileBuffer();
@@ -142,6 +146,6 @@ namespace carton {
 
 			bool canRead(streampos start, unsigned int size);
 
-			void readDeflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize);
+			void readInflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize);
 	};
 };

@@ -87,6 +87,13 @@ carton::File* carton::Carton::readFile(string fileName) {
 	return file;
 }
 
+void carton::Carton::exportFiles() {
+	this->shouldExport = true;
+	for(auto &[file, _]: this->fileList.filePositions) {
+		this->readFile(file);
+	}
+}
+
 void carton::Carton::addExtensionHandler(string extension, file_extension_handler handler, void* owner) {
 	this->extensionHandlers[extension] = pair(handler, owner);
 }
@@ -132,7 +139,7 @@ carton::EggContents* carton::Carton::parseEggContents() {
 
 	unsigned int size = egg.blockSize;
 	if(egg.compressionType != NO_COMPRESSION) {
-		this->readDeflatedIntoFileBuffer((EggCompressionTypes)egg.compressionType, egg.blockSize);
+		this->readInflatedIntoFileBuffer((EggCompressionTypes)egg.compressionType, egg.blockSize);
 		this->fileBufferSize = this->fileBufferPointer;
 		this->fileBufferPointer = 0;
 		size = this->fileBufferSize;
@@ -343,7 +350,7 @@ bool carton::Carton::canRead(streampos start, unsigned int size) {
 	}
 }
 
-void carton::Carton::readDeflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize) {
+void carton::Carton::readInflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize) {
 	this->initFileBuffer();
 	
 	const size_t outBufferSize = 1 << 20; // write a megabyte at a time
@@ -377,14 +384,16 @@ void carton::Carton::readDeflatedIntoFileBuffer(EggCompressionTypes level, unsig
 		}
 
 		// write the result to the file
+		int inflateRead = 0;
 		do {
 			int result = inflate(&stream, 0);
 			this->writeBytesToFileBuffer((char*)outBuffer, outBufferSize - stream.avail_out);
+			inflateRead = outBufferSize - stream.avail_out;
 
 			stream.next_out = outBuffer;
 			stream.avail_out = outBufferSize;
 		}
-		while(stream.avail_in > 0);
+		while(inflateRead > 0);
 	}
 
 	int result;
