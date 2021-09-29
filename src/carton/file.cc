@@ -26,6 +26,12 @@ carton::File::~File() {
 
 void carton::File::setFileName(string fileName) {
 	this->fileName = fileName;
+
+	// remove packing directory if there is one
+	if(this->carton->packingDirectory.length()) {
+		fileName = fileName.replace(fileName.begin(), fileName.begin() + this->carton->packingDirectory.length() + 1, "");
+		printf("new filename %s\n", fileName.c_str());
+	}
 	this->metadata->addMetadata("fileName", fileName);
 	this->metadata->addMetadata("extension", filesystem::path(fileName).extension());
 }

@@ -188,6 +188,10 @@ carton::EggContents* carton::Carton::parseEggContents() {
 	return output;
 }
 
+void carton::Carton::setPackingDirectory(string packingDirectory) {
+	this->packingDirectory = packingDirectory;
+}
+
 size_t carton::__writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level) {
 	if(level < carton::ZLIB_LEVEL_0 || level > carton::ZLIB_LEVEL_9) {
 		printf("invalid deflate level %d\n", level);

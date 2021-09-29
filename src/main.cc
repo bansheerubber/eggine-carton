@@ -19,11 +19,13 @@ void packFile(carton::Carton &carton, string path){
 }
 
 void packDirectory(carton::Carton &carton, string directory) {
+	carton.setPackingDirectory(directory);
 	for(auto &directoryEntry: filesystem::recursive_directory_iterator(directory)) {
 		if(filesystem::is_regular_file(directoryEntry.path()) && directoryEntry.path().extension() != ".metadata") {
 			packFile(carton, directoryEntry.path());
 		}
 	}
+	carton.setPackingDirectory("");
 }
 
 int main(int argc, char* argv[]) {

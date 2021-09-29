@@ -37,6 +37,7 @@ namespace carton {
 			class File* readFile(string fileName);
 			void exportFiles();
 			void addExtensionHandler(string extension, file_extension_handler handler, void* owner);
+			void setPackingDirectory(string packingDirectory);
 
 			MetadataDatabase database = MetadataDatabase(this);
 		
@@ -58,6 +59,7 @@ namespace carton {
 
 			bool shouldExport = false;
 			string exportDirectory = "output";
+			string packingDirectory = "";
 
 			void initFileBuffer();
 			void deleteFileBuffer();
