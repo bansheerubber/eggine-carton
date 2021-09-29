@@ -27,6 +27,7 @@ carton::File::~File() {
 void carton::File::setFileName(string fileName) {
 	this->fileName = fileName;
 	this->metadata->addMetadata("fileName", fileName);
+	this->metadata->addMetadata("extension", filesystem::path(fileName).extension());
 }
 
 string carton::File::getFileName() {
@@ -64,7 +65,15 @@ void carton::File::write() {
 
 		streampos start = this->carton->file.tellp();
 		ifstream file(this->fileName);
-		this->carton->file << file.rdbuf();
+
+		file.seekg(0, file.end);
+    unsigned long length = file.tellg();
+    file.seekg(0, file.beg);
+
+		if(length) {
+			this->carton->file << file.rdbuf();
+		}
+		
 		file.close();
 		this->carton->writeEggSize(this->carton->file.tellp() - start, eggPosition);
 	}

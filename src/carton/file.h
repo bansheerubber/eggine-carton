@@ -25,7 +25,7 @@ namespace carton {
 		
 		private:
 			string fileName;
-			bool compress = false;
+			bool compress = true;
 			bool shouldDeleteAfterRead = true;
 			char* contents = nullptr; // contents of the file in memory
 
