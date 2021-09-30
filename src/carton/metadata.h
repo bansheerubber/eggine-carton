@@ -20,11 +20,14 @@ namespace carton {
 			void addMetadata(string key, string value);
 			string getMetadata(string key);
 			bool hasMetadata(string key);
+			void loadFromFile(string fileName);
 
 		private:
 			tsl::robin_map<string, string> metadata;
 
 			streampos position;
+
+			class File* owner = nullptr;
 
 			void write();
 			void read(Egg &header, unsigned int size);

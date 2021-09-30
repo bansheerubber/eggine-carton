@@ -11,6 +11,7 @@
 carton::File::File(Carton* carton) : EggContents(carton) {
 	this->carton = carton;
 	this->metadata = new Metadata(carton);
+	this->metadata->owner = this;
 }
 
 carton::File::File(Carton* carton, Metadata* metadata) : EggContents(carton) {
@@ -33,6 +34,8 @@ void carton::File::setFileName(string fileName) {
 	}
 	this->metadata->addMetadata("fileName", fileName);
 	this->metadata->addMetadata("extension", filesystem::path(fileName).extension());
+
+	this->metadata->loadFromFile(this->fileName + ".metadata");
 }
 
 string carton::File::getFileName() {

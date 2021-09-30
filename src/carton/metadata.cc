@@ -1,6 +1,10 @@
 #include "metadata.h"
 
+#include <filesystem>
+
 #include "carton.h"
+#include "file.h"
+#include "../util/trim.h"
 
 carton::Metadata::Metadata(Carton* carton) : EggContents(carton) {
 	carton->database.addMetadata(this);
@@ -23,6 +27,27 @@ string carton::Metadata::getMetadata(string key) {
 
 bool carton::Metadata::hasMetadata(string key) {
 	return this->metadata.find(key) != this->metadata.end();
+}
+
+void carton::Metadata::loadFromFile(string fileName) {
+	if(!filesystem::exists(fileName)) {
+		return;
+	}
+
+	ifstream file(fileName);
+
+	for(string line; getline(file, line);) {
+		if(trim(line).length() == 0) {
+			continue;
+		}
+
+		size_t equalsPosition = line.find("=");
+		string key = trim(line.substr(0, equalsPosition));
+		string value = trim(line.substr(equalsPosition + 1, line.length() - equalsPosition));
+		this->addMetadata(key, value);
+	}
+
+	file.close();
 }
 
 void carton::Metadata::write() {
