@@ -9,6 +9,13 @@ vector<Argument> createArguments() {
 		help: "Show help message"
 	});
 
+	output.push_back((Argument){
+		name: "output",
+		shortcut: "o",
+		help: "Output file for pack",
+		needsInput: true,
+	});
+
 	return output;
 }
 

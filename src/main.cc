@@ -29,47 +29,49 @@ void packDirectory(carton::Carton &carton, string directory) {
 }
 
 int main(int argc, char* argv[]) {
-	vector<Argument> args = createArguments();
+	vector<Argument> arguments = createArguments();
+	ParsedArguments args = parseArguments(arguments, argc, argv);;
 	
-	if(argc < 2) {
+	if(argc < 2 || args.arguments["help"] != "") {
 		help:
-		printHelp(args, "");
+		printHelp(arguments, "");
 		return 1;
 	}
 
 	if(string(argv[1]) == "pack") {
-		if(argc < 3) {
+		if(args.files.size() < 2) {
 			printf("Please specify files or directories\n");
 			goto help;
 		}
 
 		carton::Carton carton;
 		
-		for(size_t i = 2; i < argc; i++) {
-			if(!filesystem::exists(argv[i])) {
-				printf("File or directory %s doesn't exist\n", argv[i]);
+		for(size_t i = 1; i < args.files.size(); i++) {
+			string &file = args.files[i];
+			if(!filesystem::exists(file)) {
+				printf("File or directory %s doesn't exist\n", file.c_str());
 			}
-			else if(filesystem::is_directory(argv[i])) {
-				packDirectory(carton, string(argv[i]));
+			else if(filesystem::is_directory(file)) {
+				packDirectory(carton, file);
 			}
-			else if(filesystem::is_regular_file(argv[i])) {
-				packFile(carton, string(argv[i]));
+			else if(filesystem::is_regular_file(file)) {
+				packFile(carton, file);
 			}
 			else {
-				printf("Could not understand file %s\n", argv[i]);
+				printf("Could not understand file %s\n", file.c_str());
 			}
 		}
 
-		carton.write("out.carton");
+		carton.write(args.arguments["output"] != "" ? args.arguments["output"] : "out.carton");
 	}
 	else if(string(argv[1]) == "unpack") {
-		if(argc < 3) {
+		if(args.files.size() < 2) {
 			printf("Please specify a file to unpack\n");
 			goto help;
 		}
 
 		carton::Carton carton;
-		carton.read(string(argv[2]));
+		carton.read(args.files[0]);
 		carton.exportFiles();
 	}
 	else {
