@@ -357,10 +357,10 @@ bool carton::Carton::canRead(streampos start, unsigned int size) {
 void carton::Carton::readInflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize) {
 	this->initFileBuffer();
 	
-	const size_t outBufferSize = 1 << 20; // write a megabyte at a time
+	const size_t outBufferSize = 1 << 10; // write a megabyte at a time
 	unsigned char outBuffer[outBufferSize];
 
-	const size_t inBufferSize = 1 << 20; // read a megabyte at a time
+	const size_t inBufferSize = 1 << 10; // read a megabyte at a time
 	char inBuffer[inBufferSize];
 	
 	z_stream stream {
