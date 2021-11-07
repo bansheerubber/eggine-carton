@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
 		}
 
 		carton::Carton carton;
-		carton.read(args.files[0]);
+		carton.read(args.files[1]);
 		carton.exportFiles();
 	}
 	else {
