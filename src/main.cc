@@ -8,10 +8,6 @@
 #include "carton/file.h"
 #include "carton/metadata/queryList.h"
 
-void frog(void* owner, carton::File* file, const char* buffer, size_t bufferSize) {
-	printf("handled file %s\n", file->getFileName().c_str());
-}
-
 void packFile(carton::Carton &carton, string path){ 
 	carton::File* file = new carton::File(&carton);
 	file->setFileName(path);

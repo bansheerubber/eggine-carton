@@ -45,7 +45,9 @@ string carton::File::getFileName() {
 void carton::File::write() {
 	this->metadata->write();
 
-	if(this->compress) {
+	string compress = this->metadata->getMetadata("compress");
+
+	if(compress == "" || compress == "1" || compress == "true") {
 		EggCompressionTypes level = ZLIB_LEVEL_6;
 		
 		streampos eggPosition = this->carton->writeEgg(Egg {

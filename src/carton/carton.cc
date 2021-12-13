@@ -87,6 +87,10 @@ carton::File* carton::Carton::readFile(string fileName) {
 	return file;
 }
 
+streampos carton::Carton::getFileLocation(string fileName) {
+	return this->fileList.getFile(fileName);
+}
+
 void carton::Carton::exportFiles() {
 	this->shouldExport = true;
 	for(auto &[file, _]: this->fileList.filePositions) {
