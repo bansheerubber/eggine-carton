@@ -73,6 +73,7 @@ void carton::Carton::read(string fileName) {
 	for(auto &[fileName, position]: this->fileList.filePositions) {
 		this->file.seekg(position);
 		Metadata* metadata = (Metadata*)this->parseEggContents();
+		this->fileList.trueFilePositions[fileName] = this->file.tellg();
 	}
 }
 
@@ -88,11 +89,11 @@ carton::File* carton::Carton::readFile(string fileName) {
 }
 
 streampos carton::Carton::getFileLocation(string fileName) {
-	return this->fileList.getFile(fileName);
+	return this->fileList.trueFilePositions[fileName] + sizeof(Egg::type) + sizeof(Egg::blockSize) + sizeof(Egg::continuedBlock) + sizeof(Egg::compressionType);
 }
 
 size_t carton::Carton::getFileSize(string fileName) {
-	this->file.seekg(this->fileList.getFile(fileName));
+	this->file.seekg(this->fileList.trueFilePositions[fileName]);
 	Egg egg = this->readEgg();
 	return egg.blockSize;
 }
