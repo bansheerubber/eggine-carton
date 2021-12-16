@@ -36,6 +36,7 @@ namespace carton {
 			void addFile(class File* file);
 			class File* readFile(string fileName);
 			streampos getFileLocation(string fileName);
+			size_t getFileSize(string fileName);
 			void exportFiles();
 			void addExtensionHandler(string extension, file_extension_handler handler, void* owner);
 			void setPackingDirectory(string packingDirectory);

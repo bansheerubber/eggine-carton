@@ -91,6 +91,12 @@ streampos carton::Carton::getFileLocation(string fileName) {
 	return this->fileList.getFile(fileName);
 }
 
+size_t carton::Carton::getFileSize(string fileName) {
+	this->file.seekg(this->fileList.getFile(fileName));
+	Egg egg = this->readEgg();
+	return egg.blockSize;
+}
+
 void carton::Carton::exportFiles() {
 	this->shouldExport = true;
 	for(auto &[file, _]: this->fileList.filePositions) {
