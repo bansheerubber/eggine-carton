@@ -20,6 +20,7 @@ namespace carton {
 
 		public:
 			MetadataDatabase(class Carton* carton);
+			~MetadataDatabase();
 
 			void addMetadata(class Metadata* metadata);
 			metadata::QueryList* get();

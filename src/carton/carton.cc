@@ -10,6 +10,12 @@ carton::Carton::Carton() {
 	
 }
 
+carton::Carton::~Carton() {
+	for(File* file: this->files) {
+		delete file;
+	}
+}
+
 void carton::Carton::write(string fileName) {
 	this->file.open(fileName, ios_base::out);
 

@@ -25,6 +25,7 @@ namespace carton {
 		
 		public:
 			Carton();
+			~Carton();
 
 			tsl::robin_set<EggContents*> contents;
 			tsl::robin_map<unsigned long, EggContents*> positionToContents;

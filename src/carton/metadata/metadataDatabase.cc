@@ -8,6 +8,12 @@ carton::MetadataDatabase::MetadataDatabase(Carton* carton) {
 	this->carton = carton;
 }
 
+carton::MetadataDatabase::~MetadataDatabase() {
+	for(Metadata* metadata: this->metadata) {
+		delete metadata;
+	}
+}
+
 void carton::MetadataDatabase::addMetadata(Metadata* metadata) {
 	this->metadata.push_back(metadata);
 }
