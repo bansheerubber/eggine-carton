@@ -16,6 +16,11 @@ using namespace std;
 namespace carton {
 	typedef void (*file_extension_handler)(void* owner, class File* file, const char* buffer, size_t fileBufferSize);
 	
+	struct FileBuffer {
+		const unsigned char* buffer;
+		size_t size;
+	};
+
 	class Carton {
 		friend class File;
 		friend class FileList;
@@ -36,6 +41,7 @@ namespace carton {
 			void read(string fileName);
 			void addFile(class File* file);
 			class File* readFile(string fileName);
+			FileBuffer readFileToBuffer(string fileName);
 			streampos getFileLocation(string fileName);
 			size_t getFileSize(string fileName);
 			void exportFiles();
@@ -112,7 +118,7 @@ namespace carton {
 
 			// read methods
 			Egg readEgg();
-			EggContents* parseEggContents();
+			EggContents* parseEggContents(bool deleteBuffer = true);
 
 			template<class T>
 			T readNumber() {

@@ -121,7 +121,7 @@ void carton::File::read(Egg &header, unsigned int size) {
 		memcpy(this->contents, this->carton->fileBuffer, this->carton->fileBufferSize); // copy into our content buffer
 	}
 
-	if(header.compressionType == NO_COMPRESSION) {
+	if(header.compressionType == NO_COMPRESSION && this->deleteBuffer) {
 		this->carton->deleteFileBuffer();
 	}
 }

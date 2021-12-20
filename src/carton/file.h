@@ -27,6 +27,7 @@ namespace carton {
 			string fileName;
 			bool compress = true;
 			bool shouldDeleteAfterRead = true;
+			bool deleteBuffer = true;
 			char* contents = nullptr; // contents of the file in memory
 
 			void write();

@@ -94,6 +94,22 @@ carton::File* carton::Carton::readFile(string fileName) {
 	return file;
 }
 
+carton::FileBuffer carton::Carton::readFileToBuffer(string fileName) {
+	this->file.seekg(this->fileList.getFile(fileName));
+	Metadata* metadata = (Metadata*)this->parseEggContents();
+	File* file = (File*)this->parseEggContents(false);
+	FileBuffer result = {
+		buffer: (const unsigned char*)this->fileBuffer,
+		size: this->fileBufferSize,
+	};
+
+	this->fileBuffer = nullptr;
+	this->fileBufferSize = 0;
+	this->fileBufferPointer = 0;	
+
+	return result;
+}
+
 streampos carton::Carton::getFileLocation(string fileName) {
 	return this->fileList.trueFilePositions[fileName] + sizeof(Egg::type) + sizeof(Egg::blockSize) + sizeof(Egg::continuedBlock) + sizeof(Egg::compressionType);
 }
@@ -142,7 +158,7 @@ carton::Egg carton::Carton::readEgg() {
 	};
 }
 
-carton::EggContents* carton::Carton::parseEggContents() {
+carton::EggContents* carton::Carton::parseEggContents(bool deleteBuffer) {
 	streampos start = this->file.tellg();
 
 	auto it = this->positionToContents.find(start);
@@ -177,6 +193,7 @@ carton::EggContents* carton::Carton::parseEggContents() {
 		
 		case FILE: {
 			output = new File(this, (Metadata*)this->endToContents[start]);
+			((File*)output)->deleteBuffer = deleteBuffer;
 			output->read(egg, size);
 			break;
 		}
@@ -198,7 +215,7 @@ carton::EggContents* carton::Carton::parseEggContents() {
 		this->endToContents[this->file.tellg()] = output;
 	}
 
-	if(egg.compressionType != NO_COMPRESSION) {
+	if(egg.compressionType != NO_COMPRESSION && deleteBuffer) {
 		this->deleteFileBuffer(); // clean up the mess
 	}
 
