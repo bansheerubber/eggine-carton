@@ -10,6 +10,8 @@ namespace carton {
 				QueryObject(class QueryList* list) {
 					this->list = list;
 				}
+				virtual ~QueryObject() {}
+				
 				virtual bool test(carton::Metadata* metadata) = 0;
 			
 			private:

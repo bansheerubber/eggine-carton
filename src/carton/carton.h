@@ -20,6 +20,8 @@ namespace carton {
 		const unsigned char* buffer;
 		size_t size;
 	};
+	
+	size_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level);
 
 	class Carton {
 		friend class File;

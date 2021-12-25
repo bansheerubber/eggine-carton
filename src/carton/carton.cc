@@ -78,7 +78,7 @@ void carton::Carton::read(string fileName) {
 	// loop through file list and read file metadata to build lookup tables
 	for(auto &[fileName, position]: this->fileList.filePositions) {
 		this->file.seekg(position);
-		Metadata* metadata = (Metadata*)this->parseEggContents();
+		this->parseEggContents(); // read metadata
 		this->fileList.trueFilePositions[fileName] = this->file.tellg();
 	}
 }
@@ -89,15 +89,15 @@ void carton::Carton::addFile(File* file) {
 
 carton::File* carton::Carton::readFile(string fileName) {
 	this->file.seekg(this->fileList.getFile(fileName));
-	Metadata* metadata = (Metadata*)this->parseEggContents();
+	this->parseEggContents(); // read metadata
 	File* file = (File*)this->parseEggContents();
 	return file;
 }
 
 carton::FileBuffer carton::Carton::readFileToBuffer(string fileName) {
 	this->file.seekg(this->fileList.getFile(fileName));
-	Metadata* metadata = (Metadata*)this->parseEggContents();
-	File* file = (File*)this->parseEggContents(false);
+	this->parseEggContents(); // read metadata
+	this->parseEggContents(false); // read file
 	FileBuffer result = {
 		buffer: (const unsigned char*)this->fileBuffer,
 		size: this->fileBufferSize,
@@ -144,7 +144,7 @@ streampos carton::Carton::writeEgg(Egg egg) {
 
 void carton::Carton::writeEggSize(unsigned int size, streampos position) {
 	streampos currentPosition = this->file.tellp();
-	this->file.seekp(position + sizeof(unsigned short int));
+	this->file.seekp((size_t)position + sizeof(unsigned short int));
 	this->writeNumber(size);
 	this->file.seekp(currentPosition);
 }
@@ -384,7 +384,7 @@ bool carton::Carton::canRead(streampos start, unsigned int size) {
 		return this->fileBufferPointer < size;
 	}
 	else {
-		return this->file.tellg() < start + size;
+		return (size_t)this->file.tellg() < (size_t)start + size;
 	}
 }
 
@@ -424,7 +424,7 @@ void carton::Carton::readInflatedIntoFileBuffer(EggCompressionTypes level, unsig
 		// write the result to the file
 		int inflateRead = 0;
 		do {
-			int result = inflate(&stream, 0);
+			inflate(&stream, 0);
 			this->writeBytesToFileBuffer((char*)outBuffer, outBufferSize - stream.avail_out);
 			inflateRead = outBufferSize - stream.avail_out;
 
