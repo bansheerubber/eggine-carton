@@ -30,7 +30,7 @@ carton::metadata::QueryList* carton::metadata::QueryList::has(string key) {
 DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec(bool debug) {
 	DynamicArray<carton::Metadata*> output(nullptr, 16, nullptr, nullptr);
 
-	unsigned long long start = chrono::duration_cast<chrono::microseconds>(
+	uint64_t start = chrono::duration_cast<chrono::microseconds>(
 		chrono::high_resolution_clock::now().time_since_epoch()
 	).count();
 
@@ -50,7 +50,7 @@ DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec(bool debug) {
 	}
 
 	if(debug) {
-		unsigned long long duration = chrono::duration_cast<chrono::microseconds>(
+		uint64_t duration = chrono::duration_cast<chrono::microseconds>(
 			chrono::high_resolution_clock::now().time_since_epoch()
 		).count() - start;
 

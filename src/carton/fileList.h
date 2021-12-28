@@ -20,8 +20,8 @@ namespace carton {
 			streampos getFile(string fileName);
 
 		private:
-			tsl::robin_map<string, unsigned long> filePositions; // start of the metadata + file combo
-			tsl::robin_map<string, unsigned long> trueFilePositions; // start of the file, without the metadata
+			tsl::robin_map<string, uint64_t> filePositions; // start of the metadata + file combo
+			tsl::robin_map<string, uint64_t> trueFilePositions; // start of the file, without the metadata
 
 			void write();
 			void read(Egg &header, unsigned int size);

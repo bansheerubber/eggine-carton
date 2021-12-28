@@ -25,7 +25,7 @@ void carton::Carton::write(string fileName) {
 	this->writeNumber(this->version);
 
 	this->fileListPointerPosition = this->file.tellp();
-	unsigned long fileListPointer = 0;
+	uint64_t fileListPointer = 0;
 	this->writeNumber(fileListPointer);
 
 	this->stringTable.write();
@@ -62,7 +62,7 @@ void carton::Carton::read(string fileName) {
 		exit(1);
 	}
 
-	unsigned long fileListPointer = this->readNumber<unsigned long>();
+	uint64_t fileListPointer = this->readNumber<uint64_t>();
 
 	// read the string table
 	if(&this->stringTable != this->parseEggContents()) {
@@ -153,7 +153,7 @@ carton::Egg carton::Carton::readEgg() {
 	return Egg {
 		type: this->readNumber<unsigned short int>(),
 		blockSize: this->readNumber<unsigned int>(),
-		continuedBlock: this->readNumber<unsigned long>(),
+		continuedBlock: this->readNumber<uint64_t>(),
 		compressionType: this->readNumber<unsigned short int>(),
 	};
 }

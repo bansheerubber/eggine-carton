@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace carton {
 	enum EggTypes {
 		INVALID_EGG,
@@ -29,7 +31,7 @@ namespace carton {
 
 		// if this block is separated into different blocks, then this specifies where its continued
 		// bit 0 is used to determine if this block is a continued one or not
-		unsigned long continuedBlock;
+		uint64_t continuedBlock;
 		unsigned short int compressionType;
 
 		int operator==(const Egg &other) {

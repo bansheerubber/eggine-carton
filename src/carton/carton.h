@@ -35,9 +35,9 @@ namespace carton {
 			~Carton();
 
 			tsl::robin_set<EggContents*> contents;
-			tsl::robin_map<unsigned long, EggContents*> positionToContents;
-			tsl::robin_map<EggContents*, unsigned long> contentsToEnd;
-			tsl::robin_map<unsigned long, EggContents*> endToContents;
+			tsl::robin_map<uint64_t, EggContents*> positionToContents;
+			tsl::robin_map<EggContents*, uint64_t> contentsToEnd;
+			tsl::robin_map<uint64_t, EggContents*> endToContents;
 
 			void write(string fileName);
 			void read(string fileName);
@@ -58,7 +58,7 @@ namespace carton {
 			fstream file;
 			StringTable stringTable = StringTable(this);
 			FileList fileList = FileList(this);
-			unsigned long fileListPointerPosition = 0;
+			uint64_t fileListPointerPosition = 0;
 
 			vector<class File*> files;
 

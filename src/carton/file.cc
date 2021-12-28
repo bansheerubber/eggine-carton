@@ -77,8 +77,8 @@ void carton::File::write() {
 		ifstream file(this->fileName);
 
 		file.seekg(0, file.end);
-    unsigned long length = file.tellg();
-    file.seekg(0, file.beg);
+		uint64_t length = file.tellg();
+		file.seekg(0, file.beg);
 
 		if(length) {
 			this->carton->file << file.rdbuf();
