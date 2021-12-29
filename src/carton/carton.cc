@@ -17,14 +17,14 @@ carton::Carton::~Carton() {
 }
 
 void carton::Carton::write(string fileName) {
-	this->file.open(fileName, ios_base::out);
+	this->file.open(fileName, ios_base::out | ios::binary);
 
 	const char* magic = "CARTON";
 	this->file.write(magic, 6);
 
 	this->writeNumber(this->version);
 
-	this->fileListPointerPosition = this->file.tellp();
+	this->fileListPointerPosition = (uint64_t)this->file.tellp();
 	uint64_t fileListPointer = 0;
 	this->writeNumber(fileListPointer);
 
@@ -42,10 +42,10 @@ void carton::Carton::write(string fileName) {
 }
 
 void carton::Carton::read(string fileName) {
-	this->file.open(fileName, ios_base::in);
+	this->file.open(fileName, ios_base::in | ios::binary);
 
 	this->file.seekg(0, this->file.end);
-	streampos totalSize = this->file.tellg();
+	this->totalSize = (uint64_t)this->file.tellg();
 	this->file.seekg(0, this->file.beg);
 
 	char magic[6];
@@ -79,7 +79,7 @@ void carton::Carton::read(string fileName) {
 	for(auto &[fileName, position]: this->fileList.filePositions) {
 		this->file.seekg(position);
 		this->parseEggContents(); // read metadata
-		this->fileList.trueFilePositions[fileName] = this->file.tellg();
+		this->fileList.trueFilePositions[fileName] = (uint64_t)this->file.tellg();
 	}
 }
 
@@ -110,7 +110,7 @@ carton::FileBuffer carton::Carton::readFileToBuffer(string fileName) {
 	return result;
 }
 
-streampos carton::Carton::getFileLocation(string fileName) {
+uint64_t carton::Carton::getFileLocation(string fileName) {
 	return this->fileList.trueFilePositions[fileName] + sizeof(Egg::type) + sizeof(Egg::blockSize) + sizeof(Egg::continuedBlock) + sizeof(Egg::compressionType);
 }
 
@@ -132,8 +132,8 @@ void carton::Carton::addExtensionHandler(string extension, file_extension_handle
 }
 
 // write block header
-streampos carton::Carton::writeEgg(Egg egg) {
-	streampos start = this->file.tellp();
+uint64_t carton::Carton::writeEgg(Egg egg) {
+	uint64_t start = (uint64_t)this->file.tellp();
 	
 	this->writeNumber(egg.type);
 	this->writeNumber(egg.blockSize);
@@ -142,8 +142,8 @@ streampos carton::Carton::writeEgg(Egg egg) {
 	return start;
 }
 
-void carton::Carton::writeEggSize(unsigned int size, streampos position) {
-	streampos currentPosition = this->file.tellp();
+void carton::Carton::writeEggSize(unsigned int size, uint64_t position) {
+	uint64_t currentPosition = (uint64_t)this->file.tellp();
 	this->file.seekp((size_t)position + sizeof(unsigned short int));
 	this->writeNumber(size);
 	this->file.seekp(currentPosition);
@@ -159,7 +159,7 @@ carton::Egg carton::Carton::readEgg() {
 }
 
 carton::EggContents* carton::Carton::parseEggContents(bool deleteBuffer) {
-	streampos start = this->file.tellg();
+	uint64_t start = (uint64_t)this->file.tellg();
 
 	auto it = this->positionToContents.find(start);
 	if(it != this->positionToContents.end()) {
@@ -211,8 +211,8 @@ carton::EggContents* carton::Carton::parseEggContents(bool deleteBuffer) {
 
 	if(this->contents.find(output) != this->contents.end()) { // make sure it wasn't deleted
 		this->positionToContents[start] = output;
-		this->contentsToEnd[output] = this->file.tellg();
-		this->endToContents[this->file.tellg()] = output;
+		this->contentsToEnd[output] = (uint64_t)this->file.tellg();
+		this->endToContents[(uint64_t)this->file.tellg()] = output;
 	}
 
 	if(egg.compressionType != NO_COMPRESSION && deleteBuffer) {
@@ -250,7 +250,7 @@ size_t carton::__writeDeflated(carton::Carton* carton, istream* input, const cha
 		zfree: 0,
 	};
 
-	streampos start = carton->file.tellp();
+	uint64_t start = (uint64_t)carton->file.tellp();
 	deflateInit(&stream, level - carton::ZLIB_LEVEL_0);
 
 	size_t totalRead = 0;
@@ -301,7 +301,7 @@ size_t carton::__writeDeflated(carton::Carton* carton, istream* input, const cha
 	deflateEnd(&stream);
 	delete inBuffer;
 
-	return carton->file.tellp() - start;
+	return (uint64_t)carton->file.tellp() - start;
 }
 
 size_t carton::Carton::writeDeflated(istream &input, EggCompressionTypes level) {
@@ -379,12 +379,12 @@ void carton::Carton::readFromFileIntoFileBuffer(size_t amount) {
 	this->fileBufferSize = amount;
 }
 
-bool carton::Carton::canRead(streampos start, unsigned int size) {
+bool carton::Carton::canRead(uint64_t start, unsigned int size) {
 	if(this->fileBufferSize != 0) {
 		return this->fileBufferPointer < size;
 	}
 	else {
-		return (size_t)this->file.tellg() < (size_t)start + size;
+		return (uint64_t)this->file.tellg() < (uint64_t)start + size;
 	}
 }
 
@@ -407,7 +407,7 @@ void carton::Carton::readInflatedIntoFileBuffer(EggCompressionTypes level, unsig
 	};
 
 	inflateInit(&stream);
-	streampos start = this->file.tellg();
+	uint64_t start = (uint64_t)this->file.tellg();
 	size_t readBytes = 0;
 	while(readBytes != blockSize) {
 		this->file.read(inBuffer, min(blockSize - readBytes, inBufferSize));

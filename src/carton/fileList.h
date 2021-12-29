@@ -16,8 +16,8 @@ namespace carton {
 		public:
 			using EggContents::EggContents;
 
-			void addFile(streampos position, string fileName);
-			streampos getFile(string fileName);
+			void addFile(uint64_t position, string fileName);
+			uint64_t getFile(string fileName);
 
 		private:
 			tsl::robin_map<string, uint64_t> filePositions; // start of the metadata + file combo

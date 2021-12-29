@@ -27,7 +27,7 @@ string carton::StringTable::lookup(string_table_index index) { // alias for addi
 }
 
 void carton::StringTable::write() {
-	streampos eggPosition = this->carton->writeEgg(Egg {
+	uint64_t eggPosition = this->carton->writeEgg(Egg {
 		type: STRING_TABLE,
 		blockSize: 0,
 		continuedBlock: 0,
@@ -50,7 +50,7 @@ void carton::StringTable::write() {
 }
 
 void carton::StringTable::read(Egg &header, unsigned int size) {
-	streampos start = this->carton->file.tellg();
+	uint64_t start = (uint64_t)this->carton->file.tellg();
 	while(this->carton->canRead(start, size)) {
 		string_table_index index = this->carton->readNumber<string_table_index>();
 		this->addString(this->carton->readString<unsigned char>(), index);

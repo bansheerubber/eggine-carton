@@ -51,7 +51,7 @@ void carton::Metadata::loadFromFile(string fileName) {
 }
 
 void carton::Metadata::write() {
-	streampos eggPosition = this->carton->writeEgg(Egg {
+	uint64_t eggPosition = this->carton->writeEgg(Egg {
 		type: METADATA,
 		blockSize: 0,
 		continuedBlock: 0,
@@ -70,7 +70,7 @@ void carton::Metadata::write() {
 }
 
 void carton::Metadata::read(Egg &header, unsigned int size) {
-	streampos start = this->carton->file.tellg();
+	uint64_t start = (uint64_t)this->carton->file.tellg();
 	while(this->carton->canRead(start, size)) {
 		string_table_index index = this->carton->readNumber<string_table_index>();
 		this->addMetadata(this->carton->stringTable.lookup(index), this->carton->readString<metadata_value_length>());

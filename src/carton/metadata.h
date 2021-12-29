@@ -25,7 +25,7 @@ namespace carton {
 		private:
 			tsl::robin_map<string, string> metadata;
 
-			streampos position;
+			uint64_t position;
 
 			class File* owner = nullptr;
 

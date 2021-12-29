@@ -44,7 +44,7 @@ namespace carton {
 			void addFile(class File* file);
 			class File* readFile(string fileName);
 			FileBuffer readFileToBuffer(string fileName);
-			streampos getFileLocation(string fileName);
+			uint64_t getFileLocation(string fileName);
 			size_t getFileSize(string fileName);
 			void exportFiles();
 			void addExtensionHandler(string extension, file_extension_handler handler, void* owner);
@@ -55,6 +55,7 @@ namespace carton {
 		private:
 			const unsigned int version = 1;
 			
+			uint64_t totalSize = 0;
 			fstream file;
 			StringTable stringTable = StringTable(this);
 			FileList fileList = FileList(this);
@@ -82,8 +83,8 @@ namespace carton {
 			void readFromFileIntoFileBuffer(size_t amount);
 			
 			// write methods
-			streampos writeEgg(Egg egg);
-			void writeEggSize(unsigned int size, streampos eggPosition);
+			uint64_t writeEgg(Egg egg);
+			void writeEggSize(unsigned int size, uint64_t eggPosition);
 
 			template<class T>
 			unsigned int writeNumber(T number) {
@@ -157,7 +158,7 @@ namespace carton {
 				return string(output, size);
 			}
 
-			bool canRead(streampos start, unsigned int size);
+			bool canRead(uint64_t start, unsigned int size);
 
 			void readInflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize);
 	};

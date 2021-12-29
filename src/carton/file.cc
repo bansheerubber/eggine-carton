@@ -33,7 +33,7 @@ void carton::File::setFileName(string fileName) {
 		fileName = fileName.replace(fileName.begin(), fileName.begin() + this->carton->packingDirectory.length() + 1, "");
 	}
 	this->metadata->addMetadata("fileName", fileName);
-	this->metadata->addMetadata("extension", filesystem::path(fileName).extension());
+	this->metadata->addMetadata("extension", filesystem::path(fileName).extension().string());
 
 	this->metadata->loadFromFile(this->fileName + ".metadata");
 }
@@ -50,7 +50,7 @@ void carton::File::write() {
 	if(compress == "" || compress == "1" || compress == "true") {
 		EggCompressionTypes level = ZLIB_LEVEL_6;
 		
-		streampos eggPosition = this->carton->writeEgg(Egg {
+		uint64_t eggPosition = this->carton->writeEgg(Egg {
 			type: FILE,
 			blockSize: 0,
 			continuedBlock: 0,
@@ -65,7 +65,7 @@ void carton::File::write() {
 		this->carton->writeEggSize(deflatedSize, eggPosition);
 	}
 	else {
-		streampos eggPosition = this->carton->writeEgg(Egg {
+		uint64_t eggPosition = this->carton->writeEgg(Egg {
 			type: FILE,
 			blockSize: 0,
 			continuedBlock: 0,
@@ -73,11 +73,11 @@ void carton::File::write() {
 		});
 		this->carton->fileList.addFile(this->metadata->position, this->metadata->getMetadata("fileName"));
 
-		streampos start = this->carton->file.tellp();
+		uint64_t start = (uint64_t)this->carton->file.tellp();
 		ifstream file(this->fileName);
 
 		file.seekg(0, file.end);
-		uint64_t length = file.tellg();
+		uint64_t length = (uint64_t)file.tellg();
 		file.seekg(0, file.beg);
 
 		if(length) {
@@ -85,7 +85,7 @@ void carton::File::write() {
 		}
 		
 		file.close();
-		this->carton->writeEggSize(this->carton->file.tellp() - start, eggPosition);
+		this->carton->writeEggSize((uint64_t)this->carton->file.tellp() - start, eggPosition);
 	}
 }
 
@@ -100,7 +100,7 @@ void carton::File::read(Egg &header, unsigned int size) {
 		delete this->contents;
 	}
 
-	auto it = this->carton->extensionHandlers.find(filesystem::path(this->getFileName()).extension());
+	auto it = this->carton->extensionHandlers.find(filesystem::path(this->getFileName()).extension().string());
 	if(it != this->carton->extensionHandlers.end()) {
 		(*it.value().first)(it.value().second, this, this->carton->fileBuffer, this->carton->fileBufferSize);
 	}
