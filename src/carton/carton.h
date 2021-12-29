@@ -14,21 +14,21 @@
 using namespace std;
 
 namespace carton {
-	typedef void (*file_extension_handler)(void* owner, class File* file, const char* buffer, size_t fileBufferSize);
+	typedef void (*file_extension_handler)(void* owner, class File* file, const char* buffer, uint64_t fileBufferSize);
 	
 	struct FileBuffer {
 		const unsigned char* buffer;
-		size_t size;
+		uint64_t size;
 	};
 	
-	size_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level);
+	uint64_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level);
 
 	class Carton {
 		friend class File;
 		friend class FileList;
 		friend class Metadata;
 		friend StringTable;
-		friend size_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level);
+		friend uint64_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level);
 		
 		public:
 			Carton();
@@ -45,7 +45,7 @@ namespace carton {
 			class File* readFile(string fileName);
 			FileBuffer readFileToBuffer(string fileName);
 			uint64_t getFileLocation(string fileName);
-			size_t getFileSize(string fileName);
+			uint64_t getFileSize(string fileName);
 			void exportFiles();
 			void addExtensionHandler(string extension, file_extension_handler handler, void* owner);
 			void setPackingDirectory(string packingDirectory);
@@ -66,8 +66,8 @@ namespace carton {
 			tsl::robin_map<string, pair<file_extension_handler, void*>> extensionHandlers;
 
 			char* fileBuffer = nullptr; // home for temp data, we can write/read from it using the write/read commands
-			size_t fileBufferSize = 0;
-			size_t fileBufferPointer = 0;
+			uint64_t fileBufferSize = 0;
+			uint64_t fileBufferPointer = 0;
 
 			bool shouldExport = false;
 			string exportDirectory = "output";
@@ -76,11 +76,11 @@ namespace carton {
 			void initFileBuffer();
 			void deleteFileBuffer();
 			void commitFileBuffer();
-			size_t commitDeflatedFileBuffer(EggCompressionTypes compression);
+			uint64_t commitDeflatedFileBuffer(EggCompressionTypes compression);
 			void writeToFileBuffer(char byte);
-			void writeBytesToFileBuffer(char* bytes, size_t size);
-			void readFromFileBuffer(char* output, size_t amount);
-			void readFromFileIntoFileBuffer(size_t amount);
+			void writeBytesToFileBuffer(char* bytes, uint64_t size);
+			void readFromFileBuffer(char* output, uint64_t amount);
+			void readFromFileIntoFileBuffer(uint64_t amount);
 			
 			// write methods
 			uint64_t writeEgg(Egg egg);
@@ -116,8 +116,8 @@ namespace carton {
 				return sizeof(T) + size;
 			}
 
-			size_t writeDeflated(istream &stream, EggCompressionTypes level);
-			size_t writeDeflated(char* buffer, size_t size, EggCompressionTypes level);
+			uint64_t writeDeflated(istream &stream, EggCompressionTypes level);
+			uint64_t writeDeflated(char* buffer, uint64_t size, EggCompressionTypes level);
 
 			// read methods
 			Egg readEgg();

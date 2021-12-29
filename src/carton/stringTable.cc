@@ -40,7 +40,7 @@ void carton::StringTable::write() {
 	unsigned int totalSize = 0;
 	for(auto &[key, value]: this->table) {
 		totalSize += this->carton->writeNumber(value);
-		string_table_string_length size = (string_table_string_length)min(key.length(), (size_t)STRING_TABLE_MAX_STRING_LENGTH); // only allow strings of size 0-255 in key string table
+		string_table_string_length size = (string_table_string_length)min(key.length(), (uint64_t)STRING_TABLE_MAX_STRING_LENGTH); // only allow strings of size 0-255 in key string table
 		totalSize += this->carton->writeString(key.c_str(), size); // write string
 	}
 

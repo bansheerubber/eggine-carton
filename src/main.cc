@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
 		carton::Carton carton;
 		
-		for(size_t i = 1; i < args.files.size(); i++) {
+		for(uint64_t i = 1; i < args.files.size(); i++) {
 			string &file = args.files[i];
 			if(!filesystem::exists(file)) {
 				printf("File or directory %s doesn't exist\n", file.c_str());

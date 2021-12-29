@@ -41,7 +41,7 @@ void carton::Metadata::loadFromFile(string fileName) {
 			continue;
 		}
 
-		size_t equalsPosition = line.find("=");
+		uint64_t equalsPosition = line.find("=");
 		string key = trim(line.substr(0, equalsPosition));
 		string value = trim(line.substr(equalsPosition + 1, line.length() - equalsPosition));
 		this->addMetadata(key, value);

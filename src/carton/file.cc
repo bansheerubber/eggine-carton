@@ -59,7 +59,7 @@ void carton::File::write() {
 		this->carton->fileList.addFile(this->metadata->position, this->metadata->getMetadata("fileName"));
 
 		ifstream file(this->fileName);
-		size_t deflatedSize = this->carton->writeDeflated(file, level);
+		uint64_t deflatedSize = this->carton->writeDeflated(file, level);
 		file.close();
 
 		this->carton->writeEggSize(deflatedSize, eggPosition);

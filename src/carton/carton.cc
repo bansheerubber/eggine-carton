@@ -114,7 +114,7 @@ uint64_t carton::Carton::getFileLocation(string fileName) {
 	return this->fileList.trueFilePositions[fileName] + sizeof(Egg::type) + sizeof(Egg::blockSize) + sizeof(Egg::continuedBlock) + sizeof(Egg::compressionType);
 }
 
-size_t carton::Carton::getFileSize(string fileName) {
+uint64_t carton::Carton::getFileSize(string fileName) {
 	this->file.seekg(this->fileList.trueFilePositions[fileName]);
 	Egg egg = this->readEgg();
 	return egg.blockSize;
@@ -144,7 +144,7 @@ uint64_t carton::Carton::writeEgg(Egg egg) {
 
 void carton::Carton::writeEggSize(unsigned int size, uint64_t position) {
 	uint64_t currentPosition = (uint64_t)this->file.tellp();
-	this->file.seekp((size_t)position + sizeof(unsigned short int));
+	this->file.seekp((uint64_t)position + sizeof(unsigned short int));
 	this->writeNumber(size);
 	this->file.seekp(currentPosition);
 }
@@ -226,16 +226,16 @@ void carton::Carton::setPackingDirectory(string packingDirectory) {
 	this->packingDirectory = packingDirectory;
 }
 
-size_t carton::__writeDeflated(carton::Carton* carton, istream* input, const char* buffer, size_t bufferSize, carton::EggCompressionTypes level) {
+uint64_t carton::__writeDeflated(carton::Carton* carton, istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level) {
 	if(level < carton::ZLIB_LEVEL_0 || level > carton::ZLIB_LEVEL_9) {
 		printf("invalid deflate level %d\n", level);
 		exit(1);
 	}
 	
-	const size_t outBufferSize = 1 << 20; // write a megabyte at a time
+	const uint64_t outBufferSize = 1 << 20; // write a megabyte at a time
 	unsigned char outBuffer[outBufferSize];
 
-	const size_t inBufferSize = 1 << 20; // read a megabyte at a time
+	const uint64_t inBufferSize = 1 << 20; // read a megabyte at a time
 	char* inBuffer = nullptr;
 	if(input != nullptr) {
 		inBuffer = new char[inBufferSize];
@@ -253,7 +253,7 @@ size_t carton::__writeDeflated(carton::Carton* carton, istream* input, const cha
 	uint64_t start = (uint64_t)carton->file.tellp();
 	deflateInit(&stream, level - carton::ZLIB_LEVEL_0);
 
-	size_t totalRead = 0;
+	uint64_t totalRead = 0;
 	while(true) {
 		if(input != nullptr) {
 			input->read(inBuffer, inBufferSize);
@@ -304,11 +304,11 @@ size_t carton::__writeDeflated(carton::Carton* carton, istream* input, const cha
 	return (uint64_t)carton->file.tellp() - start;
 }
 
-size_t carton::Carton::writeDeflated(istream &input, EggCompressionTypes level) {
+uint64_t carton::Carton::writeDeflated(istream &input, EggCompressionTypes level) {
 	return __writeDeflated(this, &input, nullptr, 0, level);
 }
 
-size_t carton::Carton::writeDeflated(char* buffer, size_t size, EggCompressionTypes level) {
+uint64_t carton::Carton::writeDeflated(char* buffer, uint64_t size, EggCompressionTypes level) {
 	return __writeDeflated(this, nullptr, buffer, size, level);
 }
 
@@ -335,8 +335,8 @@ void carton::Carton::commitFileBuffer() {
 	this->deleteFileBuffer();
 }
 
-size_t carton::Carton::commitDeflatedFileBuffer(EggCompressionTypes compression) {
-	size_t size = this->writeDeflated(this->fileBuffer, this->fileBufferPointer, compression);
+uint64_t carton::Carton::commitDeflatedFileBuffer(EggCompressionTypes compression) {
+	uint64_t size = this->writeDeflated(this->fileBuffer, this->fileBufferPointer, compression);
 	this->deleteFileBuffer();
 	return size;
 }
@@ -351,8 +351,8 @@ void carton::Carton::writeToFileBuffer(char byte) {
 	}
 }
 
-void carton::Carton::writeBytesToFileBuffer(char* bytes, size_t size) {
-	size_t newSize = this->fileBufferPointer + size;
+void carton::Carton::writeBytesToFileBuffer(char* bytes, uint64_t size) {
+	uint64_t newSize = this->fileBufferPointer + size;
 	while(this->fileBufferSize < newSize) {
 		this->fileBufferSize = this->fileBufferSize * 2; // new size
 		this->fileBuffer = (char*)realloc(this->fileBuffer, sizeof(char) * this->fileBufferSize);
@@ -362,13 +362,13 @@ void carton::Carton::writeBytesToFileBuffer(char* bytes, size_t size) {
 	this->fileBufferPointer += size;
 }
 
-void carton::Carton::readFromFileBuffer(char* output, size_t amount) {
-	for(size_t i = 0; i < amount; i++) {
+void carton::Carton::readFromFileBuffer(char* output, uint64_t amount) {
+	for(uint64_t i = 0; i < amount; i++) {
 		output[i] = this->fileBuffer[this->fileBufferPointer++];
 	}
 }
 
-void carton::Carton::readFromFileIntoFileBuffer(size_t amount) {
+void carton::Carton::readFromFileIntoFileBuffer(uint64_t amount) {
 	this->initFileBuffer();
 	while(this->fileBufferSize < amount) {
 		this->fileBufferSize = this->fileBufferSize * 2; // new size
@@ -391,10 +391,10 @@ bool carton::Carton::canRead(uint64_t start, unsigned int size) {
 void carton::Carton::readInflatedIntoFileBuffer(EggCompressionTypes level, unsigned int blockSize) {
 	this->initFileBuffer();
 	
-	const size_t outBufferSize = 1 << 10; // write a megabyte at a time
+	const uint64_t outBufferSize = 1 << 10; // write a megabyte at a time
 	unsigned char outBuffer[outBufferSize];
 
-	const size_t inBufferSize = 1 << 10; // read a megabyte at a time
+	const uint64_t inBufferSize = 1 << 10; // read a megabyte at a time
 	char inBuffer[inBufferSize];
 	
 	z_stream stream {
@@ -407,11 +407,10 @@ void carton::Carton::readInflatedIntoFileBuffer(EggCompressionTypes level, unsig
 	};
 
 	inflateInit(&stream);
-	uint64_t start = (uint64_t)this->file.tellg();
-	size_t readBytes = 0;
+	uint64_t readBytes = 0;
 	while(readBytes != blockSize) {
 		this->file.read(inBuffer, min(blockSize - readBytes, inBufferSize));
-		size_t read = this->file.gcount();
+		uint64_t read = this->file.gcount();
 		readBytes += read;
 
 		stream.next_in = (unsigned char*)inBuffer;

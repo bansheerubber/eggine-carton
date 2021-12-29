@@ -54,8 +54,8 @@ DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec(bool debug) {
 			chrono::high_resolution_clock::now().time_since_epoch()
 		).count() - start;
 
-		printf("Query Results (%lluus):\n", duration);
-		for(size_t i = 0; i < output.head; i++) {
+		printf("Query Results (%lluus):\n", (unsigned long long)duration);
+		for(uint64_t i = 0; i < output.head; i++) {
 			printf("  - filename: %s\n", output[i]->getMetadata("fileName").c_str());
 		}
 	}
