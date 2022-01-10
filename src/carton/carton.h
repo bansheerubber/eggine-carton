@@ -6,6 +6,10 @@
 #include <tsl/robin_set.h>
 #include <vector>
 
+#ifndef __switch__
+#include <openssl/md5.h>
+#endif
+
 #include "egg.h"
 #include "fileList.h"
 #include "metadata/metadataDatabase.h"
@@ -20,6 +24,21 @@ namespace carton {
 		const unsigned char* buffer;
 		uint64_t size;
 	};
+
+	#ifndef __switch__
+	struct CartonHash {
+		unsigned char hash[MD5_DIGEST_LENGTH];
+
+		bool operator==(const CartonHash& other) {
+			for(unsigned int i = 0; i < MD5_DIGEST_LENGTH; i++) {
+				if(this->hash[i] != other.hash[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+	};
+	#endif
 	
 	uint64_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level);
 
@@ -38,6 +57,10 @@ namespace carton {
 			tsl::robin_map<uint64_t, EggContents*> positionToContents;
 			tsl::robin_map<EggContents*, uint64_t> contentsToEnd;
 			tsl::robin_map<uint64_t, EggContents*> endToContents;
+
+			#ifndef __switch__
+			CartonHash hash;
+			#endif
 
 			void write(string fileName);
 			void read(string fileName);

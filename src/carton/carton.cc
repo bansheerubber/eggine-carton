@@ -5,6 +5,7 @@
 #include <zlib.h>
 
 #include "file.h"
+#include "../util/md5hash.h"
 
 carton::Carton::Carton() {
 	
@@ -42,6 +43,10 @@ void carton::Carton::write(string fileName) {
 }
 
 void carton::Carton::read(string fileName) {
+	#ifndef __switch__
+	md5hash(fileName, this->hash.hash);
+	#endif
+	
 	this->file.open(fileName, ios_base::in | ios::binary);
 
 	this->file.seekg(0, this->file.end);

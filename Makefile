@@ -1,5 +1,5 @@
 target = carton
-cclibs = -lz
+cclibs = -lz -lssl -lcrypto
 ccinclude = -Iinclude/robin-map/include -Iinclude
 CC = g++
 CPPFLAGS = -g -Wall -Wno-switch -Wno-class-memaccess -Wno-delete-incomplete -Wno-attributes -Bsymbolic -fPIC -fno-semantic-interposition --static -std=c++17
