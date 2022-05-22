@@ -28,7 +28,7 @@ carton::metadata::QueryList* carton::metadata::QueryList::has(string key) {
 }
 
 DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec(bool debug) {
-	DynamicArray<carton::Metadata*> output(nullptr, 16, nullptr, nullptr);
+	DynamicArray<carton::Metadata*> output(16);
 
 	uint64_t start = chrono::duration_cast<chrono::microseconds>(
 		chrono::high_resolution_clock::now().time_since_epoch()
