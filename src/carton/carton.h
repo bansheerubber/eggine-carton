@@ -15,8 +15,6 @@
 #include "metadata/metadataDatabase.h"
 #include "stringTable.h"
 
-using namespace std;
-
 namespace carton {
 	typedef void (*file_extension_handler)(void* owner, class File* file, const char* buffer, uint64_t fileBufferSize);
 	
@@ -40,14 +38,14 @@ namespace carton {
 	};
 	#endif
 	
-	uint64_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level);
+	uint64_t __writeDeflated(carton::Carton* carton, std::istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level);
 
 	class Carton {
 		friend class File;
 		friend class FileList;
 		friend class Metadata;
 		friend StringTable;
-		friend uint64_t __writeDeflated(carton::Carton* carton, istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level);
+		friend uint64_t __writeDeflated(carton::Carton* carton, std::istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level);
 		
 		public:
 			Carton();
@@ -62,16 +60,16 @@ namespace carton {
 			CartonHash hash;
 			#endif
 
-			void write(string fileName);
-			void read(string fileName);
+			void write(std::string fileName);
+			void read(std::string fileName);
 			void addFile(class File* file);
-			class File* readFile(string fileName);
-			FileBuffer readFileToBuffer(string fileName);
-			uint64_t getFileLocation(string fileName);
-			uint64_t getFileSize(string fileName);
+			class File* readFile(std::string fileName);
+			FileBuffer readFileToBuffer(std::string fileName);
+			uint64_t getFileLocation(std::string fileName);
+			uint64_t getFileSize(std::string fileName);
 			void exportFiles();
-			void addExtensionHandler(string extension, file_extension_handler handler, void* owner);
-			void setPackingDirectory(string packingDirectory);
+			void addExtensionHandler(std::string extension, file_extension_handler handler, void* owner);
+			void setPackingDirectory(std::string packingDirectory);
 
 			MetadataDatabase database = MetadataDatabase(this);
 		
@@ -79,22 +77,22 @@ namespace carton {
 			const unsigned int version = 1;
 			
 			uint64_t totalSize = 0;
-			fstream file;
+			std::fstream file;
 			StringTable stringTable = StringTable(this);
 			FileList fileList = FileList(this);
 			uint64_t fileListPointerPosition = 0;
 
-			vector<class File*> files;
+			std::vector<class File*> files;
 
-			tsl::robin_map<string, pair<file_extension_handler, void*>> extensionHandlers;
+			tsl::robin_map<std::string, std::pair<file_extension_handler, void*>> extensionHandlers;
 
 			char* fileBuffer = nullptr; // home for temp data, we can write/read from it using the write/read commands
 			uint64_t fileBufferSize = 0;
 			uint64_t fileBufferPointer = 0;
 
 			bool shouldExport = false;
-			string exportDirectory = "output";
-			string packingDirectory = "";
+			std::string exportDirectory = "output";
+			std::string packingDirectory = "";
 
 			void initFileBuffer();
 			void deleteFileBuffer();
@@ -139,7 +137,7 @@ namespace carton {
 				return sizeof(T) + size;
 			}
 
-			uint64_t writeDeflated(istream &stream, EggCompressionTypes level);
+			uint64_t writeDeflated(std::istream &stream, EggCompressionTypes level);
 			uint64_t writeDeflated(char* buffer, uint64_t size, EggCompressionTypes level);
 
 			// read methods
@@ -166,7 +164,7 @@ namespace carton {
 			}
 
 			template<class T>
-			string readString() {
+			std::string readString() {
 				// read the size of the string
 				T size = this->readNumber<T>();
 				char output[size];
@@ -178,7 +176,7 @@ namespace carton {
 					this->file.read(output, size);
 				}
 
-				return string(output, size);
+				return std::string(output, size);
 			}
 
 			bool canRead(uint64_t start, unsigned int size);

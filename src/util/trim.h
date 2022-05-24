@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <string>
 
-using namespace std;
-
-string ltrim(string s);
-string rtrim(string s);
-string trim(string s);
+std::string ltrim(std::string s);
+std::string rtrim(std::string s);
+std::string trim(std::string s);

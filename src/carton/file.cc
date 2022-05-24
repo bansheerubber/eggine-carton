@@ -25,7 +25,7 @@ carton::File::~File() {
 	}
 }
 
-void carton::File::setFileName(string fileName) {
+void carton::File::setFileName(std::string fileName) {
 	this->fileName = fileName;
 
 	// remove packing directory if there is one
@@ -33,19 +33,19 @@ void carton::File::setFileName(string fileName) {
 		fileName = fileName.replace(fileName.begin(), fileName.begin() + this->carton->packingDirectory.length() + 1, "");
 	}
 	this->metadata->addMetadata("fileName", fileName);
-	this->metadata->addMetadata("extension", filesystem::path(fileName).extension().string());
+	this->metadata->addMetadata("extension", std::filesystem::path(fileName).extension().string());
 
 	this->metadata->loadFromFile(this->fileName + ".metadata");
 }
 
-string carton::File::getFileName() {
+std::string carton::File::getFileName() {
 	return this->fileName;
 }
 
 void carton::File::write() {
 	this->metadata->write();
 
-	string compress = this->metadata->getMetadata("compress");
+	std::string compress = this->metadata->getMetadata("compress");
 
 	if(compress == "" || compress == "1" || compress == "true") {
 		EggCompressionTypes level = ZLIB_LEVEL_6;
@@ -58,7 +58,7 @@ void carton::File::write() {
 		});
 		this->carton->fileList.addFile(this->metadata->position, this->metadata->getMetadata("fileName"));
 
-		ifstream file(this->fileName);
+		std::ifstream file(this->fileName);
 		uint64_t deflatedSize = this->carton->writeDeflated(file, level);
 		file.close();
 
@@ -74,7 +74,7 @@ void carton::File::write() {
 		this->carton->fileList.addFile(this->metadata->position, this->metadata->getMetadata("fileName"));
 
 		uint64_t start = (uint64_t)this->carton->file.tellp();
-		ifstream file(this->fileName);
+		std::ifstream file(this->fileName);
 
 		file.seekg(0, file.end);
 		uint64_t length = (uint64_t)file.tellg();
@@ -100,15 +100,15 @@ void carton::File::read(Egg &header, unsigned int size) {
 		delete this->contents;
 	}
 
-	auto it = this->carton->extensionHandlers.find(filesystem::path(this->getFileName()).extension().string());
+	auto it = this->carton->extensionHandlers.find(std::filesystem::path(this->getFileName()).extension().string());
 	if(it != this->carton->extensionHandlers.end()) {
 		(*it.value().first)(it.value().second, this, this->carton->fileBuffer, this->carton->fileBufferSize);
 	}
 
 	if(this->carton->shouldExport) {
-		string output = this->carton->exportDirectory + "/" + this->fileName;
-		filesystem::create_directories(filesystem::path(output).parent_path());
-		ofstream file(output);
+		std::string output = this->carton->exportDirectory + "/" + this->fileName;
+		std::filesystem::create_directories(std::filesystem::path(output).parent_path());
+		std::ofstream file(output);
 		file.write(this->carton->fileBuffer, this->carton->fileBufferSize);
 		file.close();
 	}

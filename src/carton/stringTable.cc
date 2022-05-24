@@ -2,11 +2,11 @@
 
 #include "carton.h"
 
-string_table_index carton::StringTable::addString(string value) {
+string_table_index carton::StringTable::addString(std::string value) {
 	return this->addString(value, this->currentIndex++);
 }
 
-string_table_index carton::StringTable::addString(string value, string_table_index index) {
+string_table_index carton::StringTable::addString(std::string value, string_table_index index) {
 	auto it = this->table.find(value);
 	if(it == this->table.end()) { // insert
 		this->table[value] = index;
@@ -18,11 +18,11 @@ string_table_index carton::StringTable::addString(string value, string_table_ind
 	}
 }
 
-string_table_index carton::StringTable::lookup(string value) { // alias for adding a string
+string_table_index carton::StringTable::lookup(std::string value) { // alias for adding a string
 	return this->addString(value);
 }
 
-string carton::StringTable::lookup(string_table_index index) { // alias for adding a string
+std::string carton::StringTable::lookup(string_table_index index) { // alias for adding a string
 	return this->reverseTable[index];
 }
 
@@ -40,7 +40,7 @@ void carton::StringTable::write() {
 	unsigned int totalSize = 0;
 	for(auto &[key, value]: this->table) {
 		totalSize += this->carton->writeNumber(value);
-		string_table_string_length size = (string_table_string_length)min(key.length(), (uint64_t)STRING_TABLE_MAX_STRING_LENGTH); // only allow strings of size 0-255 in key string table
+		string_table_string_length size = (string_table_string_length)std::min(key.length(), (uint64_t)STRING_TABLE_MAX_STRING_LENGTH); // only allow strings of size 0-255 in key string table
 		totalSize += this->carton->writeString(key.c_str(), size); // write string
 	}
 

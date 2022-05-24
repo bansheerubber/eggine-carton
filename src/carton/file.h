@@ -5,8 +5,6 @@
 #include "egg.h"
 #include "metadata.h"
 
-using namespace std;
-
 namespace carton {
 	class File: public EggContents {
 		friend class Carton;
@@ -18,13 +16,13 @@ namespace carton {
 			~File();
 			
 			Metadata* metadata = nullptr;
-			void setFileName(string fileName);
-			string getFileName();
+			void setFileName(std::string fileName);
+			std::string getFileName();
 
 			void saveToCachedBuffer(); // prevent the file from deleting itself after reading its contents and sending them through extension handler
 		
 		private:
-			string fileName;
+			std::string fileName;
 			bool compress = true;
 			bool shouldDeleteAfterRead = true;
 			bool deleteBuffer = true;

@@ -8,16 +8,16 @@
 #include "carton/file.h"
 #include "carton/metadata/queryList.h"
 
-void packFile(carton::Carton &carton, string path){ 
+void packFile(carton::Carton &carton, std::string path){ 
 	carton::File* file = new carton::File(&carton);
 	file->setFileName(path);
 	carton.addFile(file);
 }
 
-void packDirectory(carton::Carton &carton, string directory) {
+void packDirectory(carton::Carton &carton, std::string directory) {
 	carton.setPackingDirectory(directory);
-	for(auto &directoryEntry: filesystem::recursive_directory_iterator(directory)) {
-		if(filesystem::is_regular_file(directoryEntry.path()) && directoryEntry.path().extension() != ".metadata") {
+	for(auto &directoryEntry: std::filesystem::recursive_directory_iterator(directory)) {
+		if(std::filesystem::is_regular_file(directoryEntry.path()) && directoryEntry.path().extension() != ".metadata") {
 			packFile(carton, directoryEntry.path());
 		}
 	}
@@ -25,7 +25,7 @@ void packDirectory(carton::Carton &carton, string directory) {
 }
 
 int main(int argc, char* argv[]) {
-	vector<Argument> arguments = createArguments();
+	std::vector<Argument> arguments = createArguments();
 	ParsedArguments args = parseArguments(arguments, argc, argv);;
 	
 	if(argc < 2 || args.arguments["help"] != "") {
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	if(string(argv[1]) == "pack") {
+	if(std::string(argv[1]) == "pack") {
 		if(args.files.size() < 2) {
 			printf("Please specify files or directories\n");
 			goto help;
@@ -43,14 +43,14 @@ int main(int argc, char* argv[]) {
 		carton::Carton carton;
 		
 		for(uint64_t i = 1; i < args.files.size(); i++) {
-			string &file = args.files[i];
-			if(!filesystem::exists(file)) {
+			std::string &file = args.files[i];
+			if(!std::filesystem::exists(file)) {
 				printf("File or directory %s doesn't exist\n", file.c_str());
 			}
-			else if(filesystem::is_directory(file)) {
+			else if(std::filesystem::is_directory(file)) {
 				packDirectory(carton, file);
 			}
-			else if(filesystem::is_regular_file(file)) {
+			else if(std::filesystem::is_regular_file(file)) {
 				packFile(carton, file);
 			}
 			else {
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 
 		carton.write(args.arguments["output"] != "" ? args.arguments["output"] : "out.carton");
 	}
-	else if(string(argv[1]) == "unpack") {
+	else if(std::string(argv[1]) == "unpack") {
 		if(args.files.size() < 2) {
 			printf("Please specify a file to unpack\n");
 			goto help;

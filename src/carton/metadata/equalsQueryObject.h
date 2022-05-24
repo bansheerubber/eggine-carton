@@ -4,18 +4,16 @@
 
 #include "queryObject.h"
 
-using namespace std;
-
 namespace carton {
 	namespace metadata {
 		class EqualsQueryObject: public QueryObject {
 			public:
-				EqualsQueryObject(class QueryList* list, string key, string value);
+				EqualsQueryObject(class QueryList* list, std::string key, std::string value);
 				bool test(carton::Metadata* metadata);
 			
 			private:
-				string key;
-				string value;
+				std::string key;
+				std::string value;
 		};
 	};
 };

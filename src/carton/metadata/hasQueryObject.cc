@@ -3,7 +3,7 @@
 #include "../metadata.h"
 #include "queryList.h"
 
-carton::metadata::HasQueryObject::HasQueryObject(QueryList* list, string key) : QueryObject(list) {
+carton::metadata::HasQueryObject::HasQueryObject(QueryList* list, std::string key) : QueryObject(list) {
 	this->key = key;
 }
 

@@ -5,18 +5,16 @@
 
 #include "queryObject.h"
 
-using namespace std;
-
 namespace carton {
 	namespace metadata {
 		class RegexQueryObject: public QueryObject {
 			public:
-				RegexQueryObject(class QueryList* list, string key, regex value);
+				RegexQueryObject(class QueryList* list, std::string key, std::regex value);
 				bool test(carton::Metadata* metadata);
 			
 			private:
-				string key;
-				regex value;
+				std::string key;
+				std::regex value;
 		};
 	};
 };

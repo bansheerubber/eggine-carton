@@ -17,8 +17,8 @@ carton::Carton::~Carton() {
 	}
 }
 
-void carton::Carton::write(string fileName) {
-	this->file.open(fileName, ios_base::out | ios::binary);
+void carton::Carton::write(std::string fileName) {
+	this->file.open(fileName, std::ios_base::out | std::ios::binary);
 
 	const char* magic = "CARTON";
 	this->file.write(magic, 6);
@@ -42,12 +42,12 @@ void carton::Carton::write(string fileName) {
 	this->file.close();
 }
 
-void carton::Carton::read(string fileName) {
+void carton::Carton::read(std::string fileName) {
 	#ifndef __switch__
 	md5hash(fileName, this->hash.hash);
 	#endif
 	
-	this->file.open(fileName, ios_base::in | ios::binary);
+	this->file.open(fileName, std::ios_base::in | std::ios::binary);
 
 	this->file.seekg(0, this->file.end);
 	this->totalSize = (uint64_t)this->file.tellg();
@@ -56,7 +56,7 @@ void carton::Carton::read(string fileName) {
 	char magic[6];
 	this->file.read(magic, 6);
 
-	if(string(magic, 6) != string("CARTON")) {
+	if(std::string(magic, 6) != std::string("CARTON")) {
 		printf("could not read '%s'\n", fileName.c_str());
 		exit(1);
 	}
@@ -92,14 +92,14 @@ void carton::Carton::addFile(File* file) {
 	this->files.push_back(file);
 }
 
-carton::File* carton::Carton::readFile(string fileName) {
+carton::File* carton::Carton::readFile(std::string fileName) {
 	this->file.seekg(this->fileList.getFile(fileName));
 	this->parseEggContents(); // read metadata
 	File* file = (File*)this->parseEggContents();
 	return file;
 }
 
-carton::FileBuffer carton::Carton::readFileToBuffer(string fileName) {
+carton::FileBuffer carton::Carton::readFileToBuffer(std::string fileName) {
 	this->file.seekg(this->fileList.getFile(fileName));
 	this->parseEggContents(); // read metadata
 	this->parseEggContents(false); // read file
@@ -115,11 +115,11 @@ carton::FileBuffer carton::Carton::readFileToBuffer(string fileName) {
 	return result;
 }
 
-uint64_t carton::Carton::getFileLocation(string fileName) {
+uint64_t carton::Carton::getFileLocation(std::string fileName) {
 	return this->fileList.trueFilePositions[fileName] + sizeof(Egg::type) + sizeof(Egg::blockSize) + sizeof(Egg::continuedBlock) + sizeof(Egg::compressionType);
 }
 
-uint64_t carton::Carton::getFileSize(string fileName) {
+uint64_t carton::Carton::getFileSize(std::string fileName) {
 	this->file.seekg(this->fileList.trueFilePositions[fileName]);
 	Egg egg = this->readEgg();
 	return egg.blockSize;
@@ -132,8 +132,8 @@ void carton::Carton::exportFiles() {
 	}
 }
 
-void carton::Carton::addExtensionHandler(string extension, file_extension_handler handler, void* owner) {
-	this->extensionHandlers[extension] = pair(handler, owner);
+void carton::Carton::addExtensionHandler(std::string extension, file_extension_handler handler, void* owner) {
+	this->extensionHandlers[extension] = std::pair(handler, owner);
 }
 
 // write block header
@@ -227,11 +227,11 @@ carton::EggContents* carton::Carton::parseEggContents(bool deleteBuffer) {
 	return output;
 }
 
-void carton::Carton::setPackingDirectory(string packingDirectory) {
+void carton::Carton::setPackingDirectory(std::string packingDirectory) {
 	this->packingDirectory = packingDirectory;
 }
 
-uint64_t carton::__writeDeflated(carton::Carton* carton, istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level) {
+uint64_t carton::__writeDeflated(carton::Carton* carton, std::istream* input, const char* buffer, uint64_t bufferSize, carton::EggCompressionTypes level) {
 	if(level < carton::ZLIB_LEVEL_0 || level > carton::ZLIB_LEVEL_9) {
 		printf("invalid deflate level %d\n", level);
 		exit(1);
@@ -262,7 +262,7 @@ uint64_t carton::__writeDeflated(carton::Carton* carton, istream* input, const c
 	while(true) {
 		if(input != nullptr) {
 			input->read(inBuffer, inBufferSize);
-			streamsize readCount = input->gcount();
+			std::streamsize readCount = input->gcount();
 			
 			stream.next_in = (unsigned char*)inBuffer;
 			stream.avail_in = readCount;
@@ -277,7 +277,7 @@ uint64_t carton::__writeDeflated(carton::Carton* carton, istream* input, const c
 			}
 			
 			stream.next_in = (unsigned char*)&buffer[totalRead];
-			stream.avail_in = min(bufferSize - totalRead, inBufferSize); // try to read a megabyte at a time
+			stream.avail_in = std::min(bufferSize - totalRead, inBufferSize); // try to read a megabyte at a time
 
 			totalRead += stream.avail_in;
 		}
@@ -309,7 +309,7 @@ uint64_t carton::__writeDeflated(carton::Carton* carton, istream* input, const c
 	return (uint64_t)carton->file.tellp() - start;
 }
 
-uint64_t carton::Carton::writeDeflated(istream &input, EggCompressionTypes level) {
+uint64_t carton::Carton::writeDeflated(std::istream &input, EggCompressionTypes level) {
 	return __writeDeflated(this, &input, nullptr, 0, level);
 }
 
@@ -414,7 +414,7 @@ void carton::Carton::readInflatedIntoFileBuffer(EggCompressionTypes level, unsig
 	inflateInit(&stream);
 	uint64_t readBytes = 0;
 	while(readBytes != blockSize) {
-		this->file.read(inBuffer, min(blockSize - readBytes, inBufferSize));
+		this->file.read(inBuffer, std::min(blockSize - readBytes, inBufferSize));
 		uint64_t read = this->file.gcount();
 		readBytes += read;
 

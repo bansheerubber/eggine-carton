@@ -17,12 +17,12 @@ carton::metadata::QueryList::~QueryList() {
 	}
 }
 
-carton::metadata::QueryList* carton::metadata::QueryList::equals(string key, string test) {
+carton::metadata::QueryList* carton::metadata::QueryList::equals(std::string key, std::string test) {
 	this->objects.push_back(new EqualsQueryObject(this, key, test));
 	return this;
 }
 
-carton::metadata::QueryList* carton::metadata::QueryList::has(string key) {
+carton::metadata::QueryList* carton::metadata::QueryList::has(std::string key) {
 	this->objects.push_back(new HasQueryObject(this, key));
 	return this;
 }
@@ -30,8 +30,8 @@ carton::metadata::QueryList* carton::metadata::QueryList::has(string key) {
 DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec(bool debug) {
 	DynamicArray<carton::Metadata*> output(16);
 
-	uint64_t start = chrono::duration_cast<chrono::microseconds>(
-		chrono::high_resolution_clock::now().time_since_epoch()
+	uint64_t start = std::chrono::duration_cast<std::chrono::microseconds>(
+		std::chrono::high_resolution_clock::now().time_since_epoch()
 	).count();
 
 	for(carton::Metadata* metadata: this->database->metadata) {
@@ -50,8 +50,8 @@ DynamicArray<carton::Metadata*> carton::metadata::QueryList::exec(bool debug) {
 	}
 
 	if(debug) {
-		uint64_t duration = chrono::duration_cast<chrono::microseconds>(
-			chrono::high_resolution_clock::now().time_since_epoch()
+		uint64_t duration = std::chrono::duration_cast<std::chrono::microseconds>(
+			std::chrono::high_resolution_clock::now().time_since_epoch()
 		).count() - start;
 
 		printf("Query Results (%lluus):\n", (unsigned long long)duration);

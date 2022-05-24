@@ -5,8 +5,6 @@
 
 #include "egg.h"
 
-using namespace std;
-
 typedef unsigned short metadata_value_length;
 
 namespace carton {
@@ -16,12 +14,12 @@ namespace carton {
 		public:
 			using EggContents::EggContents;
 
-			void addFile(uint64_t position, string fileName);
-			uint64_t getFile(string fileName);
+			void addFile(uint64_t position, std::string fileName);
+			uint64_t getFile(std::string fileName);
 
 		private:
-			tsl::robin_map<string, uint64_t> filePositions; // start of the metadata + file combo
-			tsl::robin_map<string, uint64_t> trueFilePositions; // start of the file, without the metadata
+			tsl::robin_map<std::string, uint64_t> filePositions; // start of the metadata + file combo
+			tsl::robin_map<std::string, uint64_t> trueFilePositions; // start of the file, without the metadata
 
 			void write();
 			void read(Egg &header, unsigned int size);

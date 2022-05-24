@@ -1,7 +1,7 @@
 #include "args.h"
 
-vector<Argument> createArguments() {
-	vector<Argument> output;
+std::vector<Argument> createArguments() {
+	std::vector<Argument> output;
 
 	output.push_back((Argument){
 		name: "help",
@@ -19,7 +19,7 @@ vector<Argument> createArguments() {
 	return output;
 }
 
-Argument getArgumentFromName(vector<Argument> &arguments, string &name) {
+Argument getArgumentFromName(std::vector<Argument> &arguments, std::string &name) {
 	// not the fastest code but doesn't matter, we're dealing with like 10 arguments max
 	for(Argument argument: arguments) {
 		if(argument.name == name) {
@@ -29,12 +29,12 @@ Argument getArgumentFromName(vector<Argument> &arguments, string &name) {
 	return {};
 }
 
-void printHelp(vector<Argument> &arguments, string argumentName) {
-	cout << "usage: carton [pack | unpack] [files or directories]" << endl;
+void printHelp(std::vector<Argument> &arguments, std::string argumentName) {
+	std::cout << "usage: carton [pack | unpack] [files or directories]" << std::endl;
 
 	int helpPosition = 50;
 	for(Argument argument: arguments) {
-		string parameters = "--" + argument.name;
+		std::string parameters = "--" + argument.name;
 		if(argument.helpVariable != "") {
 			parameters += " [" + argument.helpVariable + "]";
 		}
@@ -54,23 +54,23 @@ void printHelp(vector<Argument> &arguments, string argumentName) {
 			}
 		}
 		
-		cout << "    ";
-		cout << parameters;
+		std::cout << "    ";
+		std::cout << parameters;
 		for(uint64_t i = 0; i < helpPosition - parameters.length(); i++) {
-			cout << " ";
+			std::cout << " ";
 		}
-		cout << argument.help << endl;
+		std::cout << argument.help << std::endl;
 	}
 }
 
-ParsedArguments parseArguments(vector<Argument> &arguments, int argc, char* argv[]) {
+ParsedArguments parseArguments(std::vector<Argument> &arguments, int argc, char* argv[]) {
 	ParsedArguments output = {
 		argumentError: false,
 	};
 
 	Argument foundArgument;
 	for(int i = 1; i < argc; i++) {
-		string cliArgument(argv[i]);
+		std::string cliArgument(argv[i]);
 
 		// search if the string argument matches any of the struct arguments
 		if(cliArgument[0] == '-') {
@@ -83,7 +83,7 @@ ParsedArguments parseArguments(vector<Argument> &arguments, int argc, char* argv
 					return output;
 				}
 				
-				output.arguments.insert(pair<string, string>(foundArgument.name, "true"));
+				output.arguments.insert(std::pair<std::string, std::string>(foundArgument.name, "true"));
 			}
 			
 			foundArgument = (Argument){};
@@ -106,7 +106,7 @@ ParsedArguments parseArguments(vector<Argument> &arguments, int argc, char* argv
 			output.files.push_back(cliArgument);
 		}
 		else {
-			output.arguments.insert(pair<string, string>(foundArgument.name, cliArgument));
+			output.arguments.insert(std::pair<std::string, std::string>(foundArgument.name, cliArgument));
 			foundArgument = (Argument){};
 		}
 	}
@@ -120,7 +120,7 @@ ParsedArguments parseArguments(vector<Argument> &arguments, int argc, char* argv
 			return output;
 		}
 		
-		output.arguments.insert(pair<string, string>(foundArgument.name, "true"));
+		output.arguments.insert(std::pair<std::string, std::string>(foundArgument.name, "true"));
 	}
 
 	return output;

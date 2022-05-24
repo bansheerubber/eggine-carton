@@ -3,7 +3,7 @@
 #include "../metadata.h"
 #include "queryList.h"
 
-carton::metadata::EqualsQueryObject::EqualsQueryObject(QueryList* list, string key, string value) : QueryObject(list) {
+carton::metadata::EqualsQueryObject::EqualsQueryObject(QueryList* list, std::string key, std::string value) : QueryObject(list) {
 	this->key = key;
 	this->value = value;
 }

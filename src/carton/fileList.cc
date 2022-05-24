@@ -2,11 +2,11 @@
 
 #include "carton.h"
 
-void carton::FileList::addFile(uint64_t position, string fileName) {
+void carton::FileList::addFile(uint64_t position, std::string fileName) {
 	this->filePositions[fileName] = position;
 }
 
-uint64_t carton::FileList::getFile(string fileName) {
+uint64_t carton::FileList::getFile(std::string fileName) {
 	return this->filePositions[fileName];
 }
 

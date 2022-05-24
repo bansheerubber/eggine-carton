@@ -6,8 +6,6 @@
 #include "equalsQueryObject.h"
 #include "queryObject.h"
 
-using namespace std;
-
 namespace carton {
 	namespace metadata {
 		class QueryList;
@@ -26,7 +24,7 @@ namespace carton {
 			metadata::QueryList* get();
 
 		private:
-			vector<Metadata*> metadata;
+			std::vector<Metadata*> metadata;
 			class Carton* carton;
 	};
 };

@@ -5,24 +5,22 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 struct Argument {
-	string name;
-	string shortcut;
-	string helpVariable;
-	string help;
+	std::string name;
+	std::string shortcut;
+	std::string helpVariable;
+	std::string help;
 	bool needsInput;
 	bool hide;
 };
 
 struct ParsedArguments {
-	map<string, string> arguments;
-	vector<string> files;
+	std::map<std::string, std::string> arguments;
+	std::vector<std::string> files;
 	bool argumentError;
 };
 
-vector<Argument> createArguments();
-Argument getArgumentFromName(vector<Argument> &arguments, string &name);
-void printHelp(vector<Argument> &arguments, string argumentName = "");
-ParsedArguments parseArguments(vector<Argument> &arguments, int argc, char* argv[]);
+std::vector<Argument> createArguments();
+Argument getArgumentFromName(std::vector<Argument> &arguments, std::string &name);
+void printHelp(std::vector<Argument> &arguments, std::string argumentName = "");
+ParsedArguments parseArguments(std::vector<Argument> &arguments, int argc, char* argv[]);

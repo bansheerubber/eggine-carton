@@ -10,12 +10,12 @@ carton::Metadata::Metadata(Carton* carton) : EggContents(carton) {
 	carton->database.addMetadata(this);
 }
 
-void carton::Metadata::addMetadata(string key, string value) {
+void carton::Metadata::addMetadata(std::string key, std::string value) {
 	this->metadata[key] = value;
 	this->carton->stringTable.addString(key);
 }
 
-string carton::Metadata::getMetadata(string key) {
+std::string carton::Metadata::getMetadata(std::string key) {
 	auto it = this->metadata.find(key);
 	if(it == this->metadata.end()) {
 		return "";
@@ -25,25 +25,25 @@ string carton::Metadata::getMetadata(string key) {
 	}
 }
 
-bool carton::Metadata::hasMetadata(string key) {
+bool carton::Metadata::hasMetadata(std::string key) {
 	return this->metadata.find(key) != this->metadata.end();
 }
 
-void carton::Metadata::loadFromFile(string fileName) {
-	if(!filesystem::exists(fileName)) {
+void carton::Metadata::loadFromFile(std::string fileName) {
+	if(!std::filesystem::exists(fileName)) {
 		return;
 	}
 
-	ifstream file(fileName);
+	std::ifstream file(fileName);
 
-	for(string line; getline(file, line);) {
+	for(std::string line; getline(file, line);) {
 		if(trim(line).length() == 0) {
 			continue;
 		}
 
 		uint64_t equalsPosition = line.find("=");
-		string key = trim(line.substr(0, equalsPosition));
-		string value = trim(line.substr(equalsPosition + 1, line.length() - equalsPosition));
+		std::string key = trim(line.substr(0, equalsPosition));
+		std::string value = trim(line.substr(equalsPosition + 1, line.length() - equalsPosition));
 		this->addMetadata(key, value);
 	}
 
